@@ -17,12 +17,16 @@
 <meta property="og:title" content="רומא – 4 ימים בכריסמס 🏛️🎄">
 <meta property="og:description" content="20–23 בדצמבר: לו״ז יומי ברגל, אטרקציות, מסעדות, מזג אוויר ועלויות.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="רומא">
+<link rel="image_src" href="https://henmess.github.io/Rome/img/og-rome.jpg?v=3">
 <meta property="og:url" content="https://henmess.github.io/Rome/">
-<meta property="og:image" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=2">
+<meta property="og:image" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=3">
+<meta property="og:image:secure_url" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=3">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="נהר הטיבר, גשר סנט׳אנג׳לו וכיפת פטרוס הקדוש ברומא">
-<meta name="twitter:image" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=2">
+<meta name="twitter:image" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=3">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,6 +146,7 @@ img.img-failed{display:none}
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;color:#fff}
 .hero .ph{position:absolute;inset:0}
+.hero .ph img{object-position:64% 45%}
 .hero .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.22) 45%,rgba(30,12,8,.8) 100%)}
 .hero-inner{position:relative;z-index:2;width:100%;max-width:1100px;margin:0 auto;padding:0 20px 56px;text-align:center;display:flex;flex-direction:column;align-items:center}
 .kicker{display:inline-block;line-height:1.55;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:99px;font-size:.9rem;letter-spacing:.02em}
@@ -334,8 +339,8 @@ dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shad
 .flights{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 16px;max-width:640px}
 .flt{flex:1 1 240px;min-width:0;max-width:100%;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:10px 14px;text-align:right}
 .flt-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.flt-no{font-weight:800;font-size:1.05rem;letter-spacing:.02em}
-.flt-st{font-size:.74rem;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.18);white-space:nowrap}
+.flt-no{font-weight:800;font-size:1.05rem;letter-spacing:.02em;white-space:nowrap;flex:0 0 auto}
+.flt-st{font-size:.74rem;padding:2px 9px;border-radius:12px;background:rgba(255,255,255,.18);white-space:normal;text-align:center;min-width:0}
 .flt-st.ok{background:#2f8a4f}.flt-st.warn{background:#d9a21b;color:#2b211c}.flt-st.bad{background:#c2412d}
 .flt-route{font-size:.95rem;margin-top:4px}
 .flt-route .arr{opacity:.7;margin:0 4px}
@@ -506,7 +511,7 @@ footer a{color:var(--muted)}
 <body>
 
 <header class="hero">
-  <div class="ph" data-img="img/hero.jpg|wiki:Trevi Fountain|wiki:Colosseum|wiki:Rome" data-fallback="🏛️"></div>
+  <div class="ph" data-img="img/hero.jpg?v=1|wiki:Trevi Fountain|wiki:Colosseum|wiki:Rome" data-fallback="🏛️"></div>
   <div class="hero-inner">
     <span class="kicker">🇮🇹 ראשון 20.12 – רביעי 23.12 · <b>רומא</b><br>זוג, בלי רכב · 🎄 שבוע לפני חג המולד</span>
     <h1>הטיול שלנו לרומא<br><span class="sub">שווקי חג המולד · טרווי · הוותיקן · הקולוסיאום · כריסמס וורלד</span></h1>
@@ -1059,7 +1064,7 @@ footer a{color:var(--muted)}
 <button class="to-top" id="toTop" aria-label="חזרה לראש הדף" title="חזרה לראש הדף">↑</button>
 
 <footer>
-  נבנה באהבה לטיול הזוגי שלנו 🏛️ · התמונות מ־<a href="https://www.wikipedia.org" target="_blank" rel="noopener">ויקיפדיה</a> ומ־Wikimedia Commons, ברישיונות Creative Commons. מעבר עם העכבר על תמונה מציג קישור לעמוד המקור. תמונת השיתוף: גשר סנט׳אנג׳לו וכיפת פטרוס, צילום <a href="https://commons.wikimedia.org/wiki/File:PonteSantAngeloRom.jpg" target="_blank" rel="noopener">Rabax63</a>, CC BY-SA 4.0.<br>
+  נבנה באהבה לטיול הזוגי שלנו 🏛️ · התמונות מ־<a href="https://www.wikipedia.org" target="_blank" rel="noopener">ויקיפדיה</a> ומ־Wikimedia Commons, ברישיונות Creative Commons. מעבר עם העכבר על תמונה מציג קישור לעמוד המקור. תמונת הרקע והשיתוף: גשר סנט׳אנג׳לו וכיפת פטרוס, צילום <a href="https://commons.wikimedia.org/wiki/File:PonteSantAngeloRom.jpg" target="_blank" rel="noopener">Rabax63</a>, CC BY-SA 4.0.<br>
   מזג האוויר הוא ממוצע היסטורי לסוף דצמבר, וכשבועיים לפני הטיול הוא יתחלף בתחזית. זמני ההליכה, שעות הפתיחה, המחירים והמסעדות משוערים, וכדאי לבדוק אותם לפני כל יום.
 </footer>
 
