@@ -14,15 +14,15 @@
 <meta name="apple-mobile-web-app-title" content="רומא">
 <meta name="application-name" content="רומא">
 <meta name="description" content="הטיול הזוגי שלנו לרומא, 20–23 בדצמבר: הכול ברגל ובתחבורה ציבורית. לו״ז יומי, מסעדות, מזג אוויר, עלויות ומספרי חירום.">
-<meta property="og:title" content="רומא – 4 ימים לפני חג המולד 🏛️🎄">
+<meta property="og:title" content="רומא – 4 ימים בכריסמס 🏛️🎄">
 <meta property="og:description" content="20–23 בדצמבר: לו״ז יומי ברגל, אטרקציות, מסעדות, מזג אוויר ועלויות.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://henmess.github.io/Rome/">
-<meta property="og:image" content="https://henmess.github.io/Rome/img/og-rome.jpg">
+<meta property="og:image" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="מזרקת טרווי ברומא">
-<meta name="twitter:image" content="https://henmess.github.io/Rome/img/og-rome.jpg">
+<meta property="og:image:alt" content="נהר הטיבר, גשר סנט׳אנג׳לו וכיפת פטרוס הקדוש ברומא">
+<meta name="twitter:image" content="https://henmess.github.io/Rome/img/og-rome.jpg?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1059,7 +1059,7 @@ footer a{color:var(--muted)}
 <button class="to-top" id="toTop" aria-label="חזרה לראש הדף" title="חזרה לראש הדף">↑</button>
 
 <footer>
-  נבנה באהבה לטיול הזוגי שלנו 🏛️ · התמונות מ־<a href="https://www.wikipedia.org" target="_blank" rel="noopener">ויקיפדיה</a> ומ־Wikimedia Commons, ברישיונות Creative Commons. מעבר עם העכבר על תמונה מציג קישור לעמוד המקור. תמונת השיתוף: מזרקת טרווי, צילום <a href="https://commons.wikimedia.org/wiki/File:Trevi_Fountain,_Rome,_Italy_2_-_May_2007.jpg" target="_blank" rel="noopener">Diliff</a>, CC BY-SA.<br>
+  נבנה באהבה לטיול הזוגי שלנו 🏛️ · התמונות מ־<a href="https://www.wikipedia.org" target="_blank" rel="noopener">ויקיפדיה</a> ומ־Wikimedia Commons, ברישיונות Creative Commons. מעבר עם העכבר על תמונה מציג קישור לעמוד המקור. תמונת השיתוף: גשר סנט׳אנג׳לו וכיפת פטרוס, צילום <a href="https://commons.wikimedia.org/wiki/File:PonteSantAngeloRom.jpg" target="_blank" rel="noopener">Rabax63</a>, CC BY-SA 4.0.<br>
   מזג האוויר הוא ממוצע היסטורי לסוף דצמבר, וכשבועיים לפני הטיול הוא יתחלף בתחזית. זמני ההליכה, שעות הפתיחה, המחירים והמסעדות משוערים, וכדאי לבדוק אותם לפני כל יום.
 </footer>
 
@@ -1335,7 +1335,7 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
   function toast(msg){ toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600); }
   function pageUrl(){ return location.href.split("#")[0]; }
   document.getElementById("shareBtn").addEventListener("click", function(){
-    var data = { title: "רומא – 4 ימים לפני חג המולד 🏛️🎄", text: "המסלול שלנו לרומא 🏛️🎄", url: pageUrl() };
+    var data = { title: "רומא – 4 ימים בכריסמס 🏛️🎄", text: "המסלול שלנו לרומא 🏛️🎄", url: pageUrl() };
     if (navigator.share){ navigator.share(data).catch(function(){}); return; }
     var wa = function(){ window.open("https://wa.me/?text=" + encodeURIComponent(data.text + " " + data.url), "_blank"); };
     if (navigator.clipboard && navigator.clipboard.writeText){
