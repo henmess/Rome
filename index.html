@@ -527,7 +527,7 @@ footer a{color:var(--muted)}
       <div class="stat"><b id="statAttr">—</b><span>אתרים במסלול</span></div>
       <div class="stat"><b id="statKm">—</b><span>ק״מ ברגל</span></div>
       <div class="stat"><b>0</b><span>רכבים 🚶‍♀️🚶</span></div>
-      <div class="stat"><b id="statTotal">—</b><span>הוצאות בשטח (משוער)</span></div>
+      <div class="stat"><b id="statTotal">—</b><span>עלות כוללת משוערת</span></div>
     </div>
   </div>
 </header>
@@ -619,7 +619,7 @@ footer a{color:var(--muted)}
   <div class="hotel-card">
     <div class="ph" data-img="img/hotels/white.jpg|wiki:Trevi Fountain|wiki:Trevi (rione)" data-fallback="🏨"></div>
     <div class="body">
-      <span class="tag">🛏️ 3 לילות · 20–23.12 · כנראה</span>
+      <span class="tag">🛏️ 3 לילות · 20–23.12 · ארוחת בוקר · ביטול חינם · €686</span>
       <h3><bdi>White Hotel</bdi>, רומא</h3>
       <p style="margin:0;color:var(--muted)"><bdi>Via in Arcione 77, 00187 Roma</bdi>, ברובע טרווי.</p>
       <ul>
@@ -888,13 +888,14 @@ footer a{color:var(--muted)}
       <h3>הנחות החישוב</h3>
       <div class="inputs">
         <label>מספר מטיילים<input type="number" id="inPeople" min="1" max="10" value="2"></label>
-        <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.80"></label>
-        <label>טיסות ישראייר, הלוך וחזור (₪ לכולם)<input type="number" id="inFlights" min="0" step="10" value="0" placeholder="להשלים"></label>
-        <label>מלון, 3 לילות (€)<input type="number" id="inHotel" min="0" step="10" value="0" placeholder="להשלים"></label>
+        <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.55"></label>
+        <label>שער דולר (₪)<input type="number" id="inUsd" min="1" max="10" step="0.01" value="3.20"></label>
+        <label>טיסות ישראייר, הלוך וחזור לשנינו ($)<input type="number" id="inFlights" min="0" step="1" value="384"></label>
+        <label>מלון, 3 לילות עם ארוחת בוקר (€)<input type="number" id="inHotel" min="0" step="1" value="686"></label>
         <label>הסעה לשדה ביום החזרה (€)<input type="number" id="inShuttle" min="0" step="5" value="60"></label>
         <label>רמת הארוחות<select id="inMeals"><option value="0.75">חסכונית</option><option value="1" selected>רגילה</option><option value="1.4">מפנקת</option></select></label>
       </div>
-      <div class="live-note" id="liveNote">⏳ טוען שער יורו עדכני…</div>
+      <div class="live-note" id="liveNote">⏳ טוען שער יורו ודולר עדכניים…</div>
       <div class="big-total"><span>סה״כ לטיול (משוער)</span><b id="grandTotal">—</b><span id="grandSub"></span></div>
       <div class="assume">
         המחירים לפי מחירוני 2026, מעוגלים. הם עשויים להשתנות:
@@ -1354,8 +1355,9 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
   }
 
   function calc(){
-    var ppl = Math.max(1, num("inPeople", 2)), rate = num("inRate", 3.8), mealK = parseFloat($("inMeals").value) || 1;
-    var shuttle = num("inShuttle", 60), flights = num("inFlights", 0), hotel = num("inHotel", 0);
+    var ppl = Math.max(1, num("inPeople", 2)), rate = num("inRate", 3.55), mealK = parseFloat($("inMeals").value) || 1;
+    var shuttle = num("inShuttle", 60), flightsUsd = num("inFlights", 0), hotel = num("inHotel", 0), usd = num("inUsd", 3.2);
+    var flights = flightsUsd * usd;
     var tot = { attr: 0, trans: 0, meals: 0, walk: 0 }, attrLines = [], transLines = [];
     Object.keys(DAYS).forEach(function(d){
       var day = DAYS[d];
@@ -1387,8 +1389,8 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
     var fixedIls = flights + hotel * rate, grand = fixedIls + fieldIls;
 
     var h = '<tr class="group"><td colspan="2">הוצאות קבועות</td></tr>';
-    h += '<tr><td>✈️ טיסות ישראייר 6H347 / 6H350</td><td class="n">' + (flights ? ils(flights) : '<small>להשלים</small>') + '</td></tr>';
-    h += '<tr><td>🏨 <bdi>White Hotel</bdi> (3 לילות)</td><td class="n">' + (hotel ? ils(hotel * rate) + ' <small>' + eur(hotel) + '</small>' : '<small>להשלים</small>') + '</td></tr>';
+    h += '<tr><td>✈️ טיסות ישראייר 6H347 / 6H350</td><td class="n">' + (flights ? ils(flights) + ' <small>$' + flightsUsd.toLocaleString("he-IL") + '</small>' : '<small>להשלים</small>') + '</td></tr>';
+    h += '<tr><td>🏨 <bdi>White Hotel</bdi> (3 לילות, ארוחת בוקר, ביטול חינם)</td><td class="n">' + (hotel ? ils(hotel * rate) + ' <small>' + eur(hotel) + '</small>' : '<small>להשלים</small>') + '</td></tr>';
     h += '<tr class="group"><td colspan="2">הוצאות בשטח (משוער)</td></tr>';
     h += '<tr><td>🎟️ כניסה לאתרים</td><td class="n">' + ils(tot.attr * rate) + ' <small>' + eur(tot.attr) + '</small></td></tr>';
     attrLines.forEach(function(l){ h += '<tr class="sub"><td>' + l[0] + '</td><td class="n">' + ils(l[1] * rate) + '</td></tr>'; });
@@ -1402,15 +1404,15 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
 
     $("grandTotal").textContent = ils(grand);
     $("grandSub").textContent = "כ־" + ils(grand / ppl) + " לאדם" + (fixedIls ? " · קבועות " + ils(fixedIls) + " + בשטח " + ils(fieldIls) : " · בלי טיסות ומלון (להשלים למעלה)");
-    $("statTotal").textContent = ils(fieldIls);
+    $("statTotal").textContent = ils(grand);
     $("statKm").textContent = "~" + Math.round(tot.walk);
   }
-  ["inPeople","inRate","inFlights","inHotel","inShuttle","inMeals"].forEach(function(id){
+  ["inPeople","inRate","inUsd","inFlights","inHotel","inShuttle","inMeals"].forEach(function(id){
     $(id).addEventListener("input", function(){ $(id).dataset.touched = "1"; save(); calc(); });
   });
   // remember the numbers the user filled in (flights, hotel, shuttle)
-  function save(){ try { localStorage.setItem("rome.costs", JSON.stringify({ f: $("inFlights").value, h: $("inHotel").value, s: $("inShuttle").value, m: $("inMeals").value })); } catch(e){} }
-  try { var c = JSON.parse(localStorage.getItem("rome.costs")); if (c){ $("inFlights").value = c.f; $("inHotel").value = c.h; $("inShuttle").value = c.s; if (c.m) $("inMeals").value = c.m; } } catch(e){}
+  function save(){ try { localStorage.setItem("rome.costs2", JSON.stringify({ f: $("inFlights").value, h: $("inHotel").value, s: $("inShuttle").value, m: $("inMeals").value })); } catch(e){} }
+  try { var c = JSON.parse(localStorage.getItem("rome.costs2")); if (c){ $("inFlights").value = c.f; $("inHotel").value = c.h; $("inShuttle").value = c.s; if (c.m) $("inMeals").value = c.m; } } catch(e){}
   window.TRIP = { DAYS: DAYS, calc: calc, dates: SUN_DATES };
   calc();
   if (new Date() > new Date("2026-12-19T00:00:00+01:00") && new Date() < new Date("2026-12-24T00:00:00+01:00")) setInterval(calc, 60000);
@@ -1451,20 +1453,22 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
     $("tickerTrack").innerHTML = one + one;
   }
   function note(){
-    $("liveNote").textContent = (state.rate ? (state.rateLive ? "💶 שער יורו לייב: " : "💶 שער יורו (שמור מ־" + new Date(state.rateSaved).toLocaleDateString("he-IL") + "): ") + state.rate.toFixed(3) + " ₪" : "💶 שער היורו לא נטען, משתמשים ב־3.80") + (state.updated ? " · 🔄 עודכן ב־" + hhmm(state.updated) : "");
+    $("liveNote").textContent = (state.rate ? (state.rateLive ? "💶 שער יורו לייב: " : "💶 שער יורו (שמור מ־" + new Date(state.rateSaved).toLocaleDateString("he-IL") + "): ") + state.rate.toFixed(3) + " ₪" + (state.usd ? " · 💵 דולר: " + state.usd.toFixed(3) + " ₪" : "") : "💶 שער היורו לא נטען, משתמשים ב־3.55") + (state.updated ? " · 🔄 עודכן ב־" + hhmm(state.updated) : "");
   }
   function getRate(){
     function src(url, pick){ return getJSON(url).then(function(j){ var r = pick(j); return (r && r.v > 2 && r.v < 8) ? r : null; }).catch(function(){ return null; }); }
     function unixDate(u){ return u ? new Date(u * 1000).toISOString().slice(0, 10) : ""; }
     return Promise.all([
-      src("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, d: j.date, s: 1 }; }),
-      src("https://latest.currency-api.pages.dev/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, d: j.date, s: 1 }; }),
-      src("https://open.er-api.com/v6/latest/EUR", function(j){ return { v: j.rates.ILS, d: unixDate(j.time_last_update_unix), s: 2 }; }),
-      src("https://api.frankfurter.app/latest?from=EUR&to=ILS", function(j){ return { v: j.rates.ILS, d: j.date, s: 3 }; })
+      src("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, u: j.eur.ils / j.eur.usd, d: j.date, s: 1 }; }),
+      src("https://latest.currency-api.pages.dev/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, u: j.eur.ils / j.eur.usd, d: j.date, s: 1 }; }),
+      src("https://open.er-api.com/v6/latest/EUR", function(j){ return { v: j.rates.ILS, u: j.rates.ILS / j.rates.USD, d: unixDate(j.time_last_update_unix), s: 2 }; }),
+      src("https://api.frankfurter.app/latest?from=EUR&to=ILS,USD", function(j){ return { v: j.rates.ILS, u: j.rates.ILS / j.rates.USD, d: j.date, s: 3 }; })
     ]).then(function(rs){
       var best = rs.filter(Boolean).sort(function(a, b){ return (b.d || "").localeCompare(a.d || "") || (a.s - b.s); })[0];
-      if (best){ state.rate = best.v; state.rateDate = best.d; state.rateLive = true; save("rate", { v: best.v, d: best.d }); }
-      else { var c = load("rate"); if (c){ state.rate = c.v.v; state.rateDate = c.v.d; state.rateLive = false; state.rateSaved = c.t; } }
+      if (best){ state.rate = best.v; state.usd = best.u; state.rateDate = best.d; state.rateLive = true; save("rate", { v: best.v, u: best.u, d: best.d }); }
+      else { var c = load("rate"); if (c){ state.rate = c.v.v; state.usd = c.v.u; state.rateDate = c.v.d; state.rateLive = false; state.rateSaved = c.t; } }
+      var ue = $("inUsd");
+      if (state.usd > 2 && state.usd < 6 && !ue.dataset.touched) ue.value = state.usd.toFixed(2);
       var el = $("inRate");
       if (state.rate && !el.dataset.touched) el.value = state.rate.toFixed(2);
     });
