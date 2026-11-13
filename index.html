@@ -1396,6 +1396,45 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
   });
 })();
 
+/* ---------- in-page links without "#..." in the address + return to the last position after a refresh ---------- */
+(function(){
+  var KEY = "rome.scroll";
+  try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch(e){}
+  function clearHash(){ if (location.hash) try { history.replaceState(null, "", location.pathname + location.search); } catch(e){} }
+  // internal links (day nav, map popups, "all restaurants" etc.): scroll without changing the address
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+    var id = a.getAttribute("href").slice(1), t = id && document.getElementById(id);
+    if (!t) return;
+    e.preventDefault();
+    t.scrollIntoView({ behavior: "smooth", block: "start" });
+    clearHash();
+  });
+  // remember where we are
+  var tm;
+  function save(){ try { localStorage.setItem(KEY, String(Math.round(window.scrollY))); } catch(e){} }
+  window.addEventListener("scroll", function(){ clearTimeout(tm); tm = setTimeout(save, 250); }, { passive: true });
+  window.addEventListener("pagehide", save);
+  document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "hidden") save(); });
+  // on load: go back to the saved spot (a link from outside with "#..." wins only when nothing is saved)
+  var y = null;
+  try { var v = localStorage.getItem(KEY); if (v !== null) y = parseInt(v, 10); } catch(e){}
+  var hashEl = location.hash && document.getElementById(location.hash.slice(1));
+  clearHash();
+  var userMoved = false;
+  ["wheel", "touchstart", "keydown", "mousedown"].forEach(function(ev){ window.addEventListener(ev, function(){ userMoved = true; }, { once: true, passive: true }); });
+  function go(){
+    if (userMoved) return;
+    if (y !== null && !isNaN(y)) window.scrollTo({ top: y, behavior: "instant" });
+    else if (hashEl) hashEl.scrollIntoView({ block: "start" });
+  }
+  go();
+  // photos and fonts can still shift the layout a little, so correct a few times while the page settles
+  window.addEventListener("load", go);
+  [300, 900, 1800].forEach(function(ms){ setTimeout(go, ms); });
+})();
+
 /* ---------- back to top ---------- */
 (function(){
   var btn = document.getElementById("toTop");
