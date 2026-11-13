@@ -629,14 +629,14 @@ footer a{color:var(--muted)}
   <div class="hotel-card">
     <div class="ph" data-img="img/hotels/white.jpg|wiki:Trevi Fountain|wiki:Trevi (rione)" data-fallback="🏨"></div>
     <div class="body">
-      <span class="tag">🛏️ 3 לילות · 20–23.12 · ארוחת בוקר · ביטול חינם · €686</span>
+      <span class="tag">🛏️ 3 לילות · 20–23.12 · ארוחת בוקר · ביטול חינם · €727</span>
       <h3><bdi>White Hotel</bdi>, רומא</h3>
       <p style="margin:0;color:var(--muted)"><bdi>Via in Arcione 77, 00187 Roma</bdi>, ברובע טרווי.</p>
       <ul>
         <li>⛲ מזרקת טרווי: 3 דק׳ הליכה · 🪜 המדרגות הספרדיות: 8 דק׳ · 🏛️ הפנתיאון: 12 דק׳</li>
         <li>🚇 מטרו A, תחנת Barberini: 8 דק׳ · הקולוסיאום: 25 דק׳ ברגל · הוותיקן: 40 דק׳ ברגל, או 15 דק׳ במטרו</li>
         <li>🕓 צ׳ק־אאוט מאוחר עד 16:00 ביום האחרון. ההסעה לשדה (Marco Piperno) אוספת מהמלון ב־16:10 <button class="menu-btn" type="button" data-menu="transfer-dlg">🚐 פרטי ההסעה</button></li>
-        <li>💶 המחיר (€686) כולל ארוחת בוקר, ביטול חינם ומס עירוני, אז אין עוד תשלום במלון</li>
+        <li>💶 המחיר (€727) כולל ארוחת בוקר, ביטול חינם ומס עירוני, אז אין עוד תשלום במלון</li>
       </ul>
       <div class="tool-btns" style="margin-bottom:0">
         <a class="act-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Hotel+White+Via+in+Arcione+77+Roma">📍 במפה</a>
@@ -920,7 +920,7 @@ footer a{color:var(--muted)}
         <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.55"></label>
         <label>שער דולר (₪)<input type="number" id="inUsd" min="1" max="10" step="0.01" value="3.20"></label>
         <label>טיסות ישראייר, הלוך וחזור לשנינו ($)<input type="number" id="inFlights" min="0" step="1" value="384"></label>
-        <label>מלון, 3 לילות עם ארוחת בוקר (€)<input type="number" id="inHotel" min="0" step="1" value="686"></label>
+        <label>מלון, 3 לילות עם ארוחת בוקר (€)<input type="number" id="inHotel" min="0" step="1" value="727"></label>
         <label>הסעה מהשדה, 20.12 (€)<input type="number" id="inTransferIn" min="0" step="5" value="55"></label>
         <label>הסעה לשדה, 23.12 (€)<input type="number" id="inShuttle" min="0" step="5" value="55"></label>
         <label>רמת הארוחות<select id="inMeals"><option value="0.75">חסכונית</option><option value="1" selected>רגילה</option><option value="1.4">מפנקת</option></select></label>
@@ -1592,8 +1592,8 @@ try { (function(){
     $(id).addEventListener("input", function(){ $(id).dataset.touched = "1"; save(); calc(); });
   });
   // remember the numbers the user filled in (flights, hotel, shuttle)
-  function save(){ try { localStorage.setItem("rome.costs3", JSON.stringify({ f: $("inFlights").value, h: $("inHotel").value, s: $("inShuttle").value, ti: $("inTransferIn").value, m: $("inMeals").value })); } catch(e){} }
-  try { var c = JSON.parse(localStorage.getItem("rome.costs3")); if (c){ $("inFlights").value = c.f; $("inHotel").value = c.h; $("inShuttle").value = c.s; if (c.ti) $("inTransferIn").value = c.ti; if (c.m) $("inMeals").value = c.m; } } catch(e){}
+  function save(){ try { localStorage.setItem("rome.costs4", JSON.stringify({ f: $("inFlights").value, h: $("inHotel").value, s: $("inShuttle").value, ti: $("inTransferIn").value, m: $("inMeals").value })); } catch(e){} }
+  try { var c = JSON.parse(localStorage.getItem("rome.costs4")); if (c){ $("inFlights").value = c.f; $("inHotel").value = c.h; $("inShuttle").value = c.s; if (c.ti) $("inTransferIn").value = c.ti; if (c.m) $("inMeals").value = c.m; } } catch(e){}
   window.TRIP = { DAYS: DAYS, calc: calc, dates: SUN_DATES };
   calc();
   if (new Date() > new Date("2026-12-19T00:00:00+01:00") && new Date() < new Date("2026-12-24T00:00:00+01:00")) setInterval(calc, 60000);
