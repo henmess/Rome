@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="רומא">
 <meta name="application-name" content="רומא">
 <meta name="description" content="הטיול הזוגי שלנו לרומא, 20–23 בדצמבר: הכול ברגל ובתחבורה ציבורית. לו״ז יומי, מסעדות, מזג אוויר, עלויות ומספרי חירום.">
-<meta property="og:title" content="רומא ברגל – 4 ימים לפני חג המולד 🏛️🎄">
+<meta property="og:title" content="רומא – 4 ימים לפני חג המולד 🏛️🎄">
 <meta property="og:description" content="20–23 בדצמבר: לו״ז יומי ברגל, אטרקציות, מסעדות, מזג אוויר ועלויות.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://henmess.github.io/Rome/">
@@ -503,7 +503,7 @@ footer a{color:var(--muted)}
 <header class="hero">
   <div class="ph" data-img="img/hero.jpg|wiki:Trevi Fountain|wiki:Colosseum|wiki:Rome" data-fallback="🏛️"></div>
   <div class="hero-inner">
-    <span class="kicker">🇮🇹 ראשון 20.12 – רביעי 23.12 · <b>רומא ברגל</b><br>זוג, בלי רכב · 🎄 שבוע לפני חג המולד</span>
+    <span class="kicker">🇮🇹 ראשון 20.12 – רביעי 23.12 · <b>רומא</b><br>זוג, בלי רכב · 🎄 שבוע לפני חג המולד</span>
     <h1>הטיול שלנו לרומא<br><span class="sub">שווקי חג המולד · טרווי · הוותיקן · הקולוסיאום · כריסמס וורלד</span></h1>
     <p class="lead">ארבעה ימים ברגל ובמטרו, מהמלון שבין מזרקת טרווי למדרגות הספרדיות: שווקי חג המולד, עצים מוארים ותצוגות מולד, האתרים הכי מפורסמים, ואוכל רומאי טוב.</p>
     <div class="hero-weather" title="ממוצע היסטורי לסוף דצמבר">
@@ -1330,7 +1330,7 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
   function toast(msg){ toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600); }
   function pageUrl(){ return location.href.split("#")[0]; }
   document.getElementById("shareBtn").addEventListener("click", function(){
-    var data = { title: "רומא ברגל – 4 ימים לפני חג המולד 🏛️🎄", text: "המסלול שלנו לרומא 🏛️🎄", url: pageUrl() };
+    var data = { title: "רומא – 4 ימים לפני חג המולד 🏛️🎄", text: "המסלול שלנו לרומא 🏛️🎄", url: pageUrl() };
     if (navigator.share){ navigator.share(data).catch(function(){}); return; }
     var wa = function(){ window.open("https://wa.me/?text=" + encodeURIComponent(data.text + " " + data.url), "_blank"); };
     if (navigator.clipboard && navigator.clipboard.writeText){
