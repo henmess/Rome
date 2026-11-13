@@ -9,5 +9,6 @@ The site is a single-page Hebrew RTL `index.html`, built in the style of the Bla
 - Flights: Israir 6H347 lands at FCO 18:50 on 20.12; 6H350 departs FCO 20:10 on 23.12.
 - Walking links use `travelmode=walking`; metro/bus links use `travelmode=transit`. No Waze, no driving.
 - No pork and no shellfish in restaurant suggestions.
+- Preference: Christmas markets and Christmas atmosphere over ancient sites (keep only the famous ones: Colosseum, Pantheon, Trevi, St Peter's/Sistine Chapel).
 - After any itinerary change, update all places that mention it: the day timeline, `DAYS` in the costs script, `STOPS`/`PATHS` in the map script, the overview cards, the booking checklist and the ticker.
 - Check JS syntax and load the page with Playwright (390px + desktop): no JS errors and no horizontal overflow.
