@@ -1402,7 +1402,7 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
 })();
 
 /* ---------- in-page links without "#..." in the address + return to the last position after a refresh ---------- */
-(function(){
+try { (function(){
   var KEY = "rome.scroll";
   try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch(e){}
   function clearHash(){ if (location.hash) try { history.replaceState(null, "", location.pathname + location.search); } catch(e){} }
@@ -1413,7 +1413,7 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
     var id = a.getAttribute("href").slice(1), t = id && document.getElementById(id);
     if (!t) return;
     e.preventDefault();
-    t.scrollIntoView({ behavior: "smooth", block: "start" });
+    try { t.scrollIntoView({ behavior: "smooth", block: "start" }); } catch(err){ t.scrollIntoView(true); }
     clearHash();
   });
   // remember where we are
@@ -1429,16 +1429,23 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
   clearHash();
   var userMoved = false;
   ["wheel", "touchstart", "keydown", "mousedown"].forEach(function(ev){ window.addEventListener(ev, function(){ userMoved = true; }, { once: true, passive: true }); });
+  // jump without the smooth animation; works in every browser (older Safari rejects behavior:"instant")
+  function jump(fn){
+    var r = document.documentElement, old = r.style.scrollBehavior;
+    r.style.scrollBehavior = "auto";
+    try { fn(); } catch(e){}
+    r.style.scrollBehavior = old;
+  }
   function go(){
     if (userMoved) return;
-    if (y !== null && !isNaN(y)) window.scrollTo({ top: y, behavior: "instant" });
-    else if (hashEl) hashEl.scrollIntoView({ block: "start" });
+    if (y !== null && !isNaN(y)) jump(function(){ window.scrollTo(0, y); });
+    else if (hashEl) jump(function(){ hashEl.scrollIntoView(true); });
   }
   go();
   // photos and fonts can still shift the layout a little, so correct a few times while the page settles
   window.addEventListener("load", go);
   [300, 900, 1800].forEach(function(ms){ setTimeout(go, ms); });
-})();
+})(); } catch(e){}
 
 /* ---------- back to top ---------- */
 (function(){
