@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>טיול לרומא</title>
+<link rel="manifest" href="app.webmanifest?v=1">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/trip-32.png?v=1">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/trip-48.png?v=1">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/trip-apple-180.png?v=1">
+<meta name="theme-color" content="#a8432a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="רומא">
+<meta name="application-name" content="רומא">
+<meta name="description" content="הטיול הזוגי שלנו לרומא, 20–23 בדצמבר: הכול ברגל ובתחבורה ציבורית. לו״ז יומי, מסעדות, מזג אוויר, עלויות ומספרי חירום.">
+<meta property="og:title" content="רומא ברגל – 4 ימים לפני חג המולד 🏛️🎄">
+<meta property="og:description" content="20–23 בדצמבר: לו״ז יומי ברגל, אטרקציות, מסעדות, מזג אוויר ועלויות.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://henmess.github.io/Rome/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script>
+/* Photos: "wiki:Title" / "wiki:it:Title" = the lead image of a Wikipedia article (REST API, CORS-enabled),
+   "commons:File name.jpg" = a Wikimedia Commons file,
+   "img/..." or "https://..." = our own file. Every photo has a list of candidates and falls back to an emoji. */
+window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
+(function(){
+  var cache = {};
+  function wiki(name){
+    var m = /^wiki:(?:([a-z]{2}):)?(.+)$/.exec(name);
+    if (!m) return null;
+    return { lang: m[1] || "en", title: m[2].trim() };
+  }
+  // Wikimedia only serves thumbnails at these widths; any other width fails to load
+  var WM_WIDTHS = [120, 250, 330, 500, 960, 1280, 1920];
+  function wmWidth(w){ for (var i = 0; i < WM_WIDTHS.length; i++) if (WM_WIDTHS[i] >= w) return WM_WIDTHS[i]; return 1920; }
+  function summary(url, tries){ // retry when Wikipedia says "too many requests"
+    return fetch(url).then(function(r){
+      if (r.status === 429 && tries > 0) return new Promise(function(ok){ setTimeout(ok, 1500 + Math.random() * 2000); }).then(function(){ return summary(url, tries - 1); });
+      if (!r.ok) throw 0;
+      return r.json();
+    });
+  }
+  window.resolveImg = function(name, w){
+    if (isOwnImg(name)) return Promise.resolve({ src: name });
+    w = wmWidth(w);
+    if (/^commons:/.test(name)){
+      var f = encodeURIComponent(name.slice(8).trim().replace(/ /g, "_"));
+      return Promise.resolve({ src: "https://commons.wikimedia.org/wiki/Special:FilePath/" + f + "?width=" + w, page: "https://commons.wikimedia.org/wiki/File:" + f });
+    }
+    var wk = wiki(name);
+    if (!wk) return Promise.reject();
+    var key = wk.lang + ":" + wk.title;
+    if (!cache[key]) cache[key] = summary("https://" + wk.lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(wk.title.replace(/ /g, "_")), 2);
+    return cache[key].then(function(j){
+      var o = j.originalimage, t = j.thumbnail;
+      if (!o && !t) throw 0;
+      if (/\.svg/i.test((o || t).source)) throw 0; // a logo or coat of arms, not a photo
+      var src = (o && o.width <= w) || !t ? o.source : t.source.replace(/\/\d+px-/, "/" + w + "px-");
+      return { src: src, page: j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page };
+    });
+  };
+  window.fillImg = function(img, list, w, ok){
+    var i = 0;
+    (function next(){
+      if (i >= list.length){ img.onerror = null; img.classList.add("img-failed"); if (img._fail) img._fail(); return; }
+      resolveImg(list[i++], w).then(function(r){
+        img.onerror = next;
+        img.onload = function(){ img.onload = null; if (ok) ok(r); };
+        img.src = r.src;
+      }, next);
+    })();
+  };
+  window.hydrateImgs = function(root){
+    (root || document).querySelectorAll("img[data-imgs]").forEach(function(img){
+      var list = img.getAttribute("data-imgs").split("|").filter(Boolean);
+      img.removeAttribute("data-imgs");
+      fillImg(img, list, +img.getAttribute("data-w") || 120);
+    });
+  };
+  window.lazyImg = function(names, w, cls, alt){
+    return '<img class="' + (cls || "") + '" alt="' + (alt || "") + '" decoding="async" data-w="' + (w || 120) + '" data-imgs="' + names.replace(/"/g, "&quot;") + '">';
+  };
+})();
+</script>
+<style>
+:root{
+  --bg:#f7f2ea; --surface:#ffffff; --ink:#2b211c; --muted:#6e625a; --line:#e8ddd0;
+  --brand:#a8432a; --brand-2:#c25b3c; --accent:#b8862a; --sky:#efe4d6; --warm:#fbf1e3;
+  --d1:#7a5195; --d2:#2d6fa8; --d3:#b5562f; --d4:#2f8a4f; --xmas:#1f7a4d;
+  --shadow:0 10px 30px rgba(60,30,20,.10);
+  --radius:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17120f; --surface:#221b17; --ink:#f1e9e2; --muted:#b3a59a; --line:#3a2f28;
+    --brand:#e07a5c; --brand-2:#ec9174; --accent:#e0b04f; --sky:#2a211c; --warm:#2c241d;
+    --d1:#b48ad6; --d2:#6aa6dc; --d3:#e08a5f; --d4:#6cc28a; --xmas:#5cc28d;
+    --shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17120f; --surface:#221b17; --ink:#f1e9e2; --muted:#b3a59a; --line:#3a2f28;
+  --brand:#e07a5c; --brand-2:#ec9174; --accent:#e0b04f; --sky:#2a211c; --warm:#2c241d;
+  --d1:#b48ad6; --d2:#6aa6dc; --d3:#e08a5f; --d4:#6cc28a; --xmas:#5cc28d;
+  --shadow:0 10px 30px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%}
+@supports (overflow-x:clip){ html,body{overflow-x:clip} }
+@supports not (overflow-x:clip){ body{overflow-x:hidden} }
+main,section,header,footer,.day,.day-body,.grid>*,.timeline li,.what,.rest,.panel,.sos-card,.tipcard,.stay{min-width:0}
+.what,.rest p,.tip,.alt,.sos-note,.flt,.panel,footer{overflow-wrap:anywhere}
+img,svg,video,iframe{max-width:100%}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Rubik",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+img{display:block;max-width:100%}
+img.img-failed{display:none}
+
+/* ---------- photos with fallback ---------- */
+.ph{position:relative;overflow:hidden;background:linear-gradient(135deg,#c25b3c,#7a3322 60%,#3f1c14);}
+.ph img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease, transform 6s ease}
+.ph img.ok{opacity:1}
+.ph:hover img.ok{transform:scale(1.04)}
+.ph .ph-label{position:absolute;inset:auto 0 0 0;padding:28px 14px 10px;color:#fff;font-weight:500;font-size:.92rem;background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.ph .ph-fallback{position:absolute;inset:0;display:none;place-items:center;color:#fff;font-size:2.6rem;opacity:.85}
+.ph.failed .ph-fallback{display:grid}
+.ph a.credit{position:absolute;top:8px;left:8px;font-size:.7rem;color:#fff;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:99px;text-decoration:none;opacity:0;transition:opacity .2s}
+.ph:hover a.credit,.ph:focus-within a.credit{opacity:1}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;color:#fff}
+.hero .ph{position:absolute;inset:0}
+.hero .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.22) 45%,rgba(30,12,8,.8) 100%)}
+.hero-inner{position:relative;z-index:2;width:100%;max-width:1100px;margin:0 auto;padding:0 20px 56px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.kicker{display:inline-block;line-height:1.55;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:99px;font-size:.9rem;letter-spacing:.02em}
+.kicker b{font-weight:800}
+.hero h1{font-size:clamp(2.1rem,6vw,4.4rem);line-height:1.05;margin:16px 0 10px;font-weight:800;text-shadow:0 4px 30px rgba(0,0,0,.35)}
+.hero h1 .sub{display:block;font-size:.5em;font-weight:500;margin-top:8px;opacity:.95}
+.hero p.lead{font-size:clamp(1.05rem,2.2vw,1.35rem);max-width:640px;margin:0 0 22px;opacity:.95;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+.hero-stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.stat{background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 16px;min-width:120px}
+.stat b{display:block;font-size:1.5rem;line-height:1.1}
+.stat span{font-size:.85rem;opacity:.9}
+.hero-weather{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:12px 16px;max-width:620px}
+.hero-weather .big{font-size:2.2rem;line-height:1}
+.hero-weather b{font-size:1.4rem}
+.hero-weather small{display:block;opacity:.85;font-size:.82rem}
+
+/* ---------- sticky nav ---------- */
+nav.days{position:sticky;top:0;z-index:1100;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .2s}
+nav.days.stuck{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+nav.days .wrap{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth}
+nav.days .wrap::-webkit-scrollbar{display:none}
+nav.days a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:6px 14px;border-radius:99px;font-size:.88rem;font-weight:500;white-space:nowrap;transition:background .2s,color .2s,border-color .2s,transform .2s}
+nav.days a small{opacity:.7;font-weight:400}
+nav.days a:hover{border-color:var(--brand);color:var(--brand)}
+nav.days a.active{background:var(--brand);border-color:var(--brand);color:#fff;transform:translateY(-1px)}
+nav.days a.active small{opacity:.9}
+
+main{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+section{margin-top:64px;scroll-margin-top:70px}
+h2.sec{font-size:clamp(1.6rem,3.5vw,2.2rem);margin:0 0 6px}
+p.sec-sub{color:var(--muted);margin:0 0 24px}
+
+/* ---------- overview ---------- */
+.route{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.stay{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border-top:6px solid var(--c);text-decoration:none;color:var(--ink);display:block}
+.stay .ph{height:150px}
+.stay .body{padding:14px 16px 16px}
+.stay h3{margin:0 0 2px;font-size:1.08rem}
+.stay .nights{color:var(--c);font-weight:700;font-size:.88rem}
+.stay p{margin:6px 0 0;color:var(--muted);font-size:.9rem}
+.stay.d1{--c:var(--d1)} .stay.d2{--c:var(--d2)} .stay.d3{--c:var(--d3)} .stay.d4{--c:var(--d4)}
+.hotel-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:0;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:22px;border-inline-start:6px solid var(--brand)}
+.hotel-card .ph{min-height:220px}
+.hotel-card .body{padding:18px 20px}
+.hotel-card h3{margin:0 0 4px;font-size:1.3rem}
+.hotel-card ul{margin:8px 0 0;padding-inline-start:18px;color:var(--muted);font-size:.93rem}
+.hotel-card li{margin:3px 0}
+.hotel-card .tag{display:inline-block;font-size:.76rem;font-weight:700;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);padding:2px 10px;border-radius:99px}
+
+/* ---------- day cards ---------- */
+.day{background:var(--surface);border-radius:26px;box-shadow:var(--shadow);overflow:hidden;margin-top:34px;scroll-margin-top:70px;border-top:6px solid var(--c)}
+.day#day1{--c:var(--d1)} .day#day2{--c:var(--d2)} .day#day3{--c:var(--d3)} .day#day4{--c:var(--d4)}
+.day-head{position:relative;height:clamp(240px,40vw,380px)}
+.day-head .ph{position:absolute;inset:0}
+.day-head .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(25,10,6,.85))}
+.day-head .ph .ph-label{display:none}
+.day-title{position:absolute;z-index:2;inset:auto 0 0 0;padding:22px 24px;color:#fff}
+.day-num{display:inline-flex;align-items:center;gap:8px;font-weight:700;background:var(--c);color:#fff;padding:4px 12px;border-radius:99px;font-size:.92rem}
+.day-title h3{margin:8px 0 0;font-size:clamp(1.4rem,3.6vw,2.1rem);line-height:1.2;text-shadow:0 2px 16px rgba(0,0,0,.4)}
+.day-body{padding:22px 24px 26px}
+
+.daysum{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 0;margin:0 0 14px;padding:7px 6px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.daysum .it{display:inline-flex;align-items:center;gap:4px;padding:0 10px;white-space:nowrap;border-inline-end:1px solid var(--line)}
+.daysum .it:last-of-type{border-inline-end:none}
+.daysum .it b{color:var(--ink);font-weight:600}
+.daysum .tot{margin-inline-start:6px;background:var(--brand);color:#fff;border-radius:999px;padding:3px 12px;font-weight:700;white-space:nowrap}
+.daysum .tot small{font-weight:400;opacity:.8;margin-inline-start:4px}
+.wx-badge{position:absolute;z-index:3;top:14px;left:14px;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:14px;color:#fff;background:rgba(30,12,8,.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);font-variant-numeric:tabular-nums;line-height:1.15}
+.wx-badge .i{font-size:1.5rem}
+.wx-badge b{display:block;font-size:.98rem}
+.wx-badge small{display:block;font-size:.68rem;opacity:.85}
+.wx-badge .sun{display:block;margin-top:3px;padding-top:3px;border-top:1px solid rgba(255,255,255,.22);font-size:.7rem;opacity:.95;white-space:nowrap}
+.wx-badge .sun em{font-style:normal;color:#ffd98a}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.86rem;padding:5px 12px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+.chip.hotel{background:color-mix(in srgb,var(--brand) 12%,var(--surface));border-color:color-mix(in srgb,var(--brand) 35%,transparent)}
+.chip.depart{background:var(--c,var(--accent));color:#fff;border-color:transparent;font-weight:700}
+.chip.book{background:color-mix(in srgb,var(--accent) 16%,var(--surface));border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:26px;align-items:start}
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;top:8px;bottom:8px;right:67px;width:2px;background:var(--line)}
+.timeline li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:32px;padding:8px 0;position:relative}
+.timeline time{font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;font-size:.95rem;text-align:left;padding-top:1px}
+.timeline li::after{content:"";position:absolute;right:62px;top:15px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--brand)}
+.timeline li.walk::after{border-color:var(--muted);background:var(--muted)}
+.timeline li.key::after{border-color:var(--accent);background:var(--accent)}
+.timeline li.food::after{border-color:#c9a227;background:#c9a227}
+.timeline li.xmas::after{border-color:var(--xmas);background:var(--xmas)}
+.timeline li.walk .what{color:var(--muted);font-size:.93rem}
+.what b{display:block}
+.what small{display:block;color:var(--muted);font-size:.88rem}
+.what a.nav{font-size:.8rem;text-decoration:none;white-space:nowrap}
+.what small.bk{font-size:.78rem;margin-top:2px}
+.what small.oh{font-size:.78rem;margin-top:2px}
+.pay{display:inline-block;font-size:.72rem;font-weight:500;padding:1px 8px;border-radius:99px;margin-inline-start:6px;vertical-align:2px;white-space:nowrap}
+.pay.free{background:color-mix(in srgb,#2f8a4f 16%,transparent);color:#24753f}
+.pay.paid{background:color-mix(in srgb,#d9a21b 20%,transparent);color:#8a6400}
+.pay.must{background:color-mix(in srgb,#c2412d 15%,transparent);color:#a3301f}
+:root[data-theme="dark"] .pay.free{color:#7fd39a} :root[data-theme="dark"] .pay.paid{color:#f0c75a} :root[data-theme="dark"] .pay.must{color:#f19584}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pay.free{color:#7fd39a} :root:not([data-theme="light"]) .pay.paid{color:#f0c75a} :root:not([data-theme="light"]) .pay.must{color:#f19584}}
+
+.gallery{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.gallery .ph{border-radius:14px;aspect-ratio:4/3}
+.gallery .ph.wide{grid-column:1/-1;aspect-ratio:16/9}
+.tip{margin-top:14px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:14px;padding:12px 14px;font-size:.92rem}
+.tip b{color:var(--accent)}
+.alt{margin-top:12px;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:.92rem;color:var(--muted)}
+.alt b{color:var(--ink)}
+
+/* map */
+.map-card{position:relative;z-index:0;isolation:isolate;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:22px}
+#tripMap{height:420px;width:100%;background:var(--sky)}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;padding:10px 14px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+.map-legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-hotel{width:22px;height:22px;border-radius:7px;display:inline-grid;place-items:center;font-size:12px;color:#fff;background:#a8432a;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.lg-day{width:26px;border-top:3px dashed var(--c)}
+.mk-hotel{position:relative;overflow:hidden;width:46px;height:46px;border-radius:10px;display:grid;place-items:center;font-size:19px;color:#fff;background:#a8432a;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.mk-hotel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mk-attr{position:relative;overflow:hidden;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:#fff;border:3px solid #b8862a;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mk-attr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mk-air{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:#2b211c;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.leaflet-popup-content{direction:rtl;text-align:right;font-family:"Rubik",system-ui,sans-serif;font-size:.9rem;line-height:1.5;margin:10px 14px}
+.leaflet-popup-content b{display:block;font-size:.98rem}
+.leaflet-popup-content .pd{color:#6e625a;font-size:.8rem}
+.leaflet-tooltip.mk-tip{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:99px;direction:rtl}
+.map-fallback{display:grid;place-items:center;height:100%;color:var(--muted);font-size:.95rem;padding:20px;text-align:center}
+.pop-img{width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:6px;display:block}
+.pop-img:not([src]){display:none}
+.map-days{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px 12px 0}
+.map-days button{font:inherit;font-size:.8rem;padding:4px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.map-days button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+@media (max-width:480px){ #tripMap{height:340px} }
+
+/* menu popup */
+.menu-btn{font:inherit;font-size:.75rem;font-weight:500;margin-inline-start:6px;padding:2px 10px;border-radius:99px;border:1px solid color-mix(in srgb,#c9a227 50%,transparent);background:color-mix(in srgb,#c9a227 16%,var(--surface));color:var(--ink);cursor:pointer;vertical-align:2px}
+.menu-btn:hover{background:color-mix(in srgb,#c9a227 30%,var(--surface))}
+dialog.menu-dlg,dialog.tool-dlg{border:none;padding:0;border-radius:18px;max-width:min(440px,calc(100vw - 32px));width:100%;background:transparent;color:var(--ink)}
+dialog.menu-dlg::backdrop,dialog.tool-dlg::backdrop{background:rgba(20,10,6,.55);backdrop-filter:blur(2px)}
+dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shadow:0 20px 60px rgba(0,0,0,.35);background:var(--warm)}
+.dlg-x{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--ink);font-size:.95rem;cursor:pointer}
+.dlg-x:hover{background:rgba(0,0,0,.16)}
+.rest{margin-top:14px;background:var(--warm);border-radius:16px;padding:14px 16px;border:1px solid color-mix(in srgb,#c9a227 30%,transparent)}
+.rest .tag{display:inline-block;font-size:.74rem;font-weight:700;color:#8a6d0b;background:color-mix(in srgb,#c9a227 22%,transparent);padding:2px 10px;border-radius:99px}
+:root[data-theme="dark"] .rest .tag{color:#e7c75a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rest .tag{color:#e7c75a}}
+.rest h4{margin:6px 0 2px;font-size:1.05rem}
+.rest p{margin:0 0 8px;font-size:.88rem;color:var(--muted)}
+.menu{width:100%;border-collapse:collapse;font-size:.88rem}
+.menu td{padding:5px 0;border-top:1px dashed color-mix(in srgb,var(--muted) 35%,transparent);vertical-align:top}
+.menu td.pr{text-align:left;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums;padding-inline-start:10px}
+.menu td i{display:block;font-style:normal;color:var(--muted);font-size:.78rem;direction:ltr;text-align:right}
+.rest .note{font-size:.75rem;color:var(--muted);margin-top:6px}
+
+/* tools */
+.tool-box{position:relative;background:var(--surface);border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.tool-box h3{margin:0 0 10px;font-size:1.15rem}
+.tool-box p{margin:0 0 10px;color:var(--muted);font-size:.92rem}
+.tool-box ul{margin:0 0 10px;padding-inline-start:18px;font-size:.9rem;color:var(--muted)}
+.tool-box li{margin:3px 0}
+.tool-btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tool-btns .act-btn{text-decoration:none;box-shadow:none}
+.tool-note{font-size:.8rem;color:var(--muted);margin:6px 0 0;line-height:1.6}
+.tools-bar{display:inline-flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.tool{font:inherit;display:flex;align-items:center;gap:6px;padding:7px 14px;border:none;background:none;color:var(--ink);cursor:pointer;font-size:.82rem;font-weight:500;white-space:nowrap}
+.tool+.tool{border-inline-start:1px solid var(--line)}
+.tool .ic{font-size:1rem;line-height:1}
+.tool:hover{background:color-mix(in srgb,var(--brand) 9%,transparent);color:var(--brand)}
+.tool[disabled]{opacity:.6;cursor:wait}
+@media (max-width:480px){
+  .tools-bar{display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px}
+  .tool{flex-direction:column;gap:2px;padding:7px 4px;font-size:.72rem}
+  .tool .ic{font-size:1.05rem}
+}
+.actions{display:flex;justify-content:center;gap:10px;padding:12px 16px 0;max-width:1100px;margin:0 auto}
+.act-btn{font:inherit;font-size:.9rem;font-weight:500;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.act-btn:hover{border-color:var(--brand);color:var(--brand)}
+.act-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.act-btn.primary:hover{background:var(--brand-2);color:#fff}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);z-index:1200;background:#2b211c;color:#fff;padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.to-top{position:fixed;left:16px;bottom:18px;z-index:1100;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;background:var(--brand);color:#fff;font-size:1.35rem;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .25s,transform .25s}
+.to-top.show{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{background:var(--brand-2)}
+
+/* flights */
+.flights{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 16px;max-width:640px}
+.flt{flex:1 1 240px;min-width:0;max-width:100%;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:10px 14px;text-align:right}
+.flt-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.flt-no{font-weight:800;font-size:1.05rem;letter-spacing:.02em}
+.flt-st{font-size:.74rem;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.18);white-space:nowrap}
+.flt-st.ok{background:#2f8a4f}.flt-st.warn{background:#d9a21b;color:#2b211c}.flt-st.bad{background:#c2412d}
+.flt-route{font-size:.95rem;margin-top:4px}
+.flt-route .arr{opacity:.7;margin:0 4px}
+.flt small{display:block;opacity:.85;font-size:.76rem}
+.flt-links{flex-basis:100%;font-size:.76rem;opacity:.9}
+.flt-links a{color:#fff}
+
+/* ticker */
+.ticker{direction:ltr;overflow:hidden;contain:paint;max-width:100%;border-top:1px solid var(--line);background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;font-size:.88rem;white-space:nowrap}
+.ticker .track{display:flex;width:max-content;animation:tick 45s linear infinite}
+.ticker:hover .track{animation-play-state:paused}
+.ticker .item{direction:rtl;display:inline-flex;align-items:center;gap:6px;padding:7px 26px;border-inline-end:1px solid rgba(255,255,255,.25)}
+.ticker .item b{font-variant-numeric:tabular-nums}
+.ticker .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ffe08a;box-shadow:0 0 0 0 rgba(255,224,138,.7);animation:pulse 2s infinite}
+@keyframes tick{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,224,138,.6)}70%{box-shadow:0 0 0 7px rgba(255,224,138,0)}100%{box-shadow:0 0 0 0 rgba(255,224,138,0)}}
+@media (prefers-reduced-motion: reduce){.ticker .track{animation:none;flex-wrap:wrap;width:auto;justify-content:center}}
+.live-note{font-size:.78rem;color:var(--muted);margin-top:8px}
+
+/* ideas catalog */
+.cat-filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.cat-filters button{font:inherit;font-size:.85rem;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.cat-filters button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.cat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cat{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.cat .ph{height:130px}
+.cat .cb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
+.cat h3{margin:0;font-size:1rem}
+.cat .st{align-self:flex-start;font-size:.74rem;font-weight:700;padding:2px 10px;border-radius:99px}
+.cat .st.free{background:color-mix(in srgb,#2f8a4f 16%,transparent);color:#24753f}
+.cat .st.pay{background:color-mix(in srgb,#d9a21b 22%,transparent);color:#8a6400}
+:root[data-theme="dark"] .cat .st.free{color:#7fd39a} :root[data-theme="dark"] .cat .st.pay{color:#f0c75a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cat .st.free{color:#7fd39a} :root:not([data-theme="light"]) .cat .st.pay{color:#f0c75a}}
+.cat p{margin:0;color:var(--muted);font-size:.86rem}
+.cat .meta2{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:auto;padding-top:6px}
+.cat .meta2 a{text-decoration:none}
+.cat-empty{color:var(--muted);text-align:center;padding:20px}
+.xmas-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#1f7a4d,#14513a);color:#fff;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+.xmas-head .ic{font-size:2.4rem;flex:0 0 auto}
+.xmas-head p{margin:0;font-size:.92rem;opacity:.95;flex:1 1 260px}
+
+/* webcams */
+.cams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cam{display:block;text-decoration:none;color:var(--ink);background:var(--surface);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.cam-img{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#c25b3c,#7a3322)}
+.cam-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cam-img .cam-emoji{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4rem}
+.cam-live{position:absolute;top:8px;left:8px;font-size:.66rem;font-weight:700;color:#fff;background:#c2412d;padding:1px 7px;border-radius:99px}
+.cam-img .cam-go{position:absolute;bottom:8px;left:8px;font-size:.7rem;color:#fff;background:rgba(0,0,0,.4);padding:1px 8px;border-radius:99px}
+.cam-cap{padding:8px 10px}
+.cam-cap b{display:block;font-size:.88rem}
+.cam-cap small{color:var(--muted);font-size:.74rem}
+
+/* costs */
+.cost-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
+.panel h3{margin:0 0 12px;font-size:1.1rem}
+table.costs{width:100%;border-collapse:collapse;font-size:.95rem}
+table.costs th,table.costs td{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}
+table.costs td.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.costs tr.group td{font-weight:700;color:var(--brand);background:color-mix(in srgb,var(--brand) 7%,transparent);border-bottom:none;font-size:.85rem}
+table.costs tr.sub td{color:var(--muted);font-size:.88rem;padding-inline-start:18px}
+table.costs tr.grand td{font-weight:800;font-size:1.15rem;border-bottom:none;border-top:3px solid var(--brand)}
+table.costs small{color:var(--muted);font-weight:400}
+.inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inputs label{font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.inputs input,.inputs select{font:inherit;font-size:1rem;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.big-total{margin-top:16px;background:var(--brand);color:#fff;border-radius:16px;padding:16px 18px}
+.big-total b{display:block;font-size:2rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.big-total span{opacity:.9;font-size:.88rem}
+.assume{font-size:.8rem;color:var(--muted);margin-top:12px}
+.assume ul{margin:6px 0 0;padding-inline-start:18px}
+
+/* emergency */
+.sos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sos-card{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;border-top:5px solid #c2412d;scroll-margin-top:110px}
+.sos-card h3{margin:0;font-size:1.05rem}
+.sos-sub{margin:2px 0 10px;color:var(--muted);font-size:.82rem}
+.sos-list{display:flex;flex-direction:column;gap:6px}
+a.tel{display:flex;justify-content:space-between;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:.88rem}
+a.tel b{direction:ltr;unicode-bidi:isolate;white-space:nowrap;color:#c2412d;font-size:.95rem}
+a.tel:hover{border-color:#c2412d}
+.sos-note{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.chip.sos{background:color-mix(in srgb,#c2412d 12%,var(--surface));border-color:color-mix(in srgb,#c2412d 35%,transparent);text-decoration:none;color:var(--ink)}
+
+/* tips */
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tipcard{background:var(--surface);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.tipcard .ico{font-size:1.6rem}
+.tipcard h3{margin:6px 0 4px;font-size:1.05rem}
+.tipcard p{margin:0;color:var(--muted);font-size:.93rem}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checklist label{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:.93rem}
+.checklist input{margin-top:5px;accent-color:var(--brand);width:18px;height:18px;flex:0 0 auto}
+.checklist input:checked + span{text-decoration:line-through;color:var(--muted)}
+.checklist small{display:block;color:var(--muted);font-size:.8rem}
+
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 16px 50px;border-top:1px solid var(--line)}
+footer a{color:var(--muted)}
+.print-only{display:none}
+
+@media (max-width:860px){
+  .grid,.cost-wrap,.hotel-card{grid-template-columns:minmax(0,1fr)}
+  .route{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tips,.sos-grid{grid-template-columns:1fr}
+  .cat-grid,.cams{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:480px){
+  .hero{min-height:auto;padding-top:28px}
+  .hero-inner{padding:0 14px 40px}
+  .hero h1{font-size:1.85rem;margin:12px 0 6px}
+  .hero p.lead{font-size:.95rem;margin-bottom:14px}
+  .hero-weather{gap:4px 14px;padding:10px 12px;margin-bottom:12px;width:100%}
+  .hero-weather .big{font-size:1.6rem}
+  .hero-weather b{font-size:1.05rem}
+  .hero-weather small{font-size:.72rem}
+  .flights{gap:8px;width:100%}
+  .flt{flex-basis:100%;padding:8px 12px}
+  .flt-st{font-size:.68rem;white-space:normal;text-align:center}
+  .hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+  .stat{min-width:0;padding:8px 10px}
+  .hero-stats .stat:last-child:nth-child(odd){grid-column:1/-1}
+  .stat b{font-size:1.15rem}
+  .day-body{padding:18px 16px 22px}
+  .day-title{padding:18px 16px}
+  .daysum{border-radius:16px}
+  .daysum .tot{margin-inline-start:0}
+  .panel{padding:16px}
+  .route,.cat-grid,.cams{grid-template-columns:minmax(0,1fr)}
+  .inputs{grid-template-columns:minmax(0,1fr)}
+}
+
+@media print{
+  @page{size:A4;margin:11mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  :root{--bg:#fff;--surface:#fff;--ink:#2b211c;--muted:#6e625a;--line:#ddd;--shadow:none}
+  html{scroll-behavior:auto}
+  body{background:#fff;font-size:11pt}
+  nav.days,.actions,.to-top,#cams,dialog.tool-dlg,.toast,.menu-btn,.map-card,.gallery,.ph a.credit,.inputs,.live-note,.chip.sos,.cat-filters,.cat .ph,.flt-links{display:none !important}
+  .print-only{display:block}
+  .flights{color:#2b211c}.flt{border-color:#ccc}
+  .hero{min-height:0;height:62mm;margin-bottom:6mm}
+  .hero-inner{padding-bottom:6mm}
+  .hero h1{font-size:24pt;margin:6px 0}
+  .hero p.lead,.hero-stats{display:none}
+  main{padding:0}
+  section{margin-top:8mm}
+  .day{box-shadow:none;border:1px solid #ccc;border-radius:12px;margin-top:0;break-before:page}
+  #costs,#sos{break-before:page}
+  .day-head{height:38mm;break-after:avoid}
+  .day-title{padding:8px 14px}
+  .day-title h3{font-size:15pt}
+  .day-body{padding:10px 14px}
+  .grid{grid-template-columns:1fr;gap:6px}
+  .timeline li{break-inside:avoid;padding:4px 0}
+  .tip,.alt,.rest{break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+  .sos-grid,.tips{grid-template-columns:repeat(2,1fr)}
+  .sos-card,.tipcard,.panel,.cat{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .cost-wrap{grid-template-columns:1fr}
+  dialog.menu-dlg{display:block;position:static;max-width:none;width:auto;margin:0 0 5mm;padding:0;background:none;break-inside:avoid}
+  dialog.menu-dlg .rest{box-shadow:none}
+  .dlg-x{display:none}
+  .menus-title{margin:8mm 0 4mm;font-size:16pt;break-before:page}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="ph" data-img="img/hero.jpg|wiki:Trevi Fountain|wiki:Colosseum|wiki:Rome" data-fallback="🏛️"></div>
+  <div class="hero-inner">
+    <span class="kicker">🇮🇹 ראשון 20.12 – רביעי 23.12 · <b>רומא ברגל</b><br>זוג, בלי רכב · 🎄 שבוע לפני חג המולד</span>
+    <h1>הטיול שלנו לרומא<br><span class="sub">טרווי · הוותיקן · הקולוסיאום · טרסטוורה · וילה בורגזה</span></h1>
+    <p class="lead">ארבעה ימים ברגל ובמטרו, מהמלון שבין מזרקת טרווי למדרגות הספרדיות: עתיקות, אמנות, סמטאות, אוכל רומאי ואורות חג המולד.</p>
+    <div class="hero-weather" title="ממוצע היסטורי לסוף דצמבר">
+      <span class="big">🌤️</span>
+      <div><b><bdi dir="ltr">14° / 5°</bdi></b><small>ממוצע היסטורי לסוף דצמבר · רומא</small></div>
+      <div><b>🌅 07:35 · 🌇 16:40</b><small>ימים קצרים, מתכננים את התצפיות עד 16:30</small></div>
+    </div>
+    <div class="flights">
+      <div class="flt" id="flt-out">
+        <div class="flt-top"><span class="flt-no" data-fno>✈️ 6H347</span><span class="flt-st" data-st>⏳ בודק…</span></div>
+        <div class="flt-route">תל אביב <span class="arr">←</span> רומא (FCO) <b><bdi dir="ltr" data-t2>18:50</bdi></b></div>
+        <small>הלוך · ראשון 20.12 · ישראייר · נחיתה בשעה המקומית ברומא</small>
+      </div>
+      <div class="flt" id="flt-back">
+        <div class="flt-top"><span class="flt-no" data-fno>✈️ 6H350</span><span class="flt-st" data-st>⏳ בודק…</span></div>
+        <div class="flt-route"><b><bdi dir="ltr" data-t1>20:10</bdi></b> רומא (FCO) <span class="arr">←</span> תל אביב</div>
+        <small>חזור · רביעי 23.12 · ישראייר · נחיתה בנתב״ג אחרי חצות</small>
+      </div>
+      <div class="flt-links"><a target="_blank" rel="noopener" href="https://www.iaa.gov.il/airports/ben-gurion/flight-board/">לוח הטיסות של נתב״ג ↗</a> · <a target="_blank" rel="noopener" href="https://www.adr.it/web/aeroporti-di-roma-en/pax-fco-arrivals">לוח ההגעות בפיומיצ׳ינו ↗</a> · <a target="_blank" rel="noopener" href="https://www.israir.co.il/">ישראייר ↗</a></div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>4</b><span>ימים · 3 לילות</span></div>
+      <div class="stat"><b id="statAttr">—</b><span>אתרים במסלול</span></div>
+      <div class="stat"><b id="statKm">—</b><span>ק״מ ברגל</span></div>
+      <div class="stat"><b>0</b><span>רכבים 🚶‍♀️🚶</span></div>
+      <div class="stat"><b id="statTotal">—</b><span>הוצאות בשטח (משוער)</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="days" id="daynav" aria-label="ניווט בין הימים">
+  <div class="wrap">
+    <a href="#overview">סקירה</a>
+    <a href="#day1">ראשון <small>20.12</small></a>
+    <a href="#day2">שני <small>21.12</small></a>
+    <a href="#day3">שלישי <small>22.12</small></a>
+    <a href="#day4">רביעי <small>23.12</small></a>
+    <a href="#ideas">🎄 עוד רעיונות</a>
+    <a href="#book">🎟️ להזמין</a>
+    <a href="#cams">📷 מצלמות</a>
+    <a href="#costs">💰 עלויות</a>
+    <a href="#sos">🚨 חירום</a>
+    <a href="#tips">טיפים</a>
+  </div>
+  <div class="ticker" aria-label="עדכונים חיים"><div class="track" id="tickerTrack"></div></div>
+</nav>
+
+<div class="actions" role="toolbar" aria-label="כלים">
+  <div class="tools-bar">
+    <button class="tool" id="shareBtn" type="button" title="שתף את המסלול"><span class="ic">📤</span><span class="lb">שיתוף</span></button>
+    <button class="tool" id="pdfBtn" type="button" title="שמור כ־PDF"><span class="ic">📄</span><span class="lb">PDF</span></button>
+    <button class="tool" id="homeBtn" type="button" title="ניווט ברגל חזרה למלון"><span class="ic">🏨</span><span class="lb">למלון</span></button>
+    <button class="tool" id="metroBtn" type="button" title="מטרו, אוטובוס ומונית"><span class="ic">🚇</span><span class="lb">תחבורה</span></button>
+  </div>
+</div>
+
+<dialog class="tool-dlg" id="homeDlg" aria-label="חזרה למלון">
+  <div class="tool-box">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <h3>🏨 חזרה ל־<bdi>White Hotel</bdi></h3>
+    <p><bdi>Via in Arcione 77</bdi>, בין מזרקת טרווי לרחוב Via del Tritone. כתובת למונית: <b><bdi dir="ltr">Hotel White, Via in Arcione 77</bdi></b></p>
+    <div class="tool-btns">
+      <a class="act-btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Hotel+White+Via+in+Arcione+77+Roma">🚶 ניווט ברגל למלון</a>
+      <a class="act-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=transit&destination=Hotel+White+Via+in+Arcione+77+Roma">🚇 בתחבורה ציבורית</a>
+    </div>
+    <p class="tool-note">תחנות קרובות: מטרו A <b>Barberini</b> (כ־8 דק׳ הליכה). אוטובוסים ברחוב Via del Tritone (כ־2 דק׳). מכל מקום במרכז ההיסטורי הולכים למלון ב־10–25 דקות.</p>
+  </div>
+</dialog>
+
+<dialog class="tool-dlg" id="metroDlg" aria-label="תחבורה ציבורית">
+  <div class="tool-box">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <h3>🚇 מטרו, אוטובוס ומונית</h3>
+    <ul>
+      <li><b>הכי פשוט: Tap &amp; Go.</b> מצמידים כרטיס אשראי או טלפון לשער של המטרו או למכשיר באוטובוס. כל אחד צריך כרטיס או טלפון משלו. החיוב מוגבל ל־€8.50 ליום</li>
+      <li><b>כרטיס בודד (BIT):</b> €1.50, תקף 100 דק׳ באוטובוסים ונסיעה אחת במטרו. בודקים את המחיר במכונה, כי דובר על העלאה</li>
+      <li>אנחנו בעיקר הולכים ברגל, אז לא כדאי לקנות כרטיס יומי (€8.50) או כרטיס ל־48 שעות (€15)</li>
+      <li>המטרו הקרוב: קו A, תחנת <b>Barberini</b>. לוותיקן נוסעים לתחנת <b>Ottaviano</b>, 5 תחנות</li>
+      <li>⚠️ במטרו A ובאוטובוסים 40 ו־64 יש הרבה כייסים. הטלפון בכיס הקדמי, התיק לפנים</li>
+      <li>🚕 מונית: מזמינים באפליקציה (FREENOW או itTaxi), או ברדיו טקסי <bdi dir="ltr">06 3570</bdi>. לא עוצרים מונית ברחוב, הולכים לתחנת מוניות</li>
+    </ul>
+    <div class="tool-btns">
+      <a class="act-btn primary" target="_blank" rel="noopener" href="https://www.atac.roma.it/en">ATAC: מפות ומחירים ↗</a>
+      <a class="act-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/taxi+stand/">🚕 תחנת מוניות קרובה</a>
+    </div>
+    <p class="tool-note">הכרטיסים של העיר לא תקפים ברכבת לשדה התעופה (Leonardo Express).</p>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<main>
+
+<!-- ================= OVERVIEW ================= -->
+<section id="overview">
+  <h2 class="sec">המסלול במבט אחד</h2>
+  <p class="sec-sub">כל יום בצבע משלו. הקווים המקווקווים הם מסלולי ההליכה בערך. לחיצה על נקודה פותחת את הפרטים שלה ואת הקישור ליום.</p>
+  <div class="map-card">
+    <div class="map-days" id="mapDays" role="group" aria-label="סינון לפי יום">
+      <button type="button" data-d="all" class="on">כל הימים</button>
+      <button type="button" data-d="1">ראשון 20.12</button>
+      <button type="button" data-d="2">שני 21.12</button>
+      <button type="button" data-d="3">שלישי 22.12</button>
+      <button type="button" data-d="4">רביעי 23.12</button>
+    </div>
+    <div id="tripMap" dir="ltr" role="region" aria-label="מפת הטיול"></div>
+    <div class="map-legend">
+      <span><i class="lg-hotel">🛏</i> המלון</span>
+      <span><i class="lg-day" style="--c:var(--d1)"></i> ראשון: טרווי בלילה</span>
+      <span><i class="lg-day" style="--c:var(--d2)"></i> שני: הוותיקן ופיאצה נבונה</span>
+      <span><i class="lg-day" style="--c:var(--d3)"></i> שלישי: רומא העתיקה וטרסטוורה</span>
+      <span><i class="lg-day" style="--c:var(--d4)"></i> רביעי: בורגזה וסביבת המלון</span>
+    </div>
+  </div>
+
+  <div class="hotel-card">
+    <div class="ph" data-img="img/hotels/white.jpg|wiki:Trevi Fountain|wiki:Trevi (rione)" data-fallback="🏨"></div>
+    <div class="body">
+      <span class="tag">🛏️ 3 לילות · 20–23.12 · כנראה</span>
+      <h3><bdi>White Hotel</bdi>, רומא</h3>
+      <p style="margin:0;color:var(--muted)"><bdi>Via in Arcione 77, 00187 Roma</bdi>, ברובע טרווי.</p>
+      <ul>
+        <li>⛲ מזרקת טרווי: 3 דק׳ הליכה · 🪜 המדרגות הספרדיות: 8 דק׳ · 🏛️ הפנתיאון: 12 דק׳</li>
+        <li>🚇 מטרו A, תחנת Barberini: 8 דק׳ · הקולוסיאום: 25 דק׳ ברגל · הוותיקן: 40 דק׳ ברגל, או 15 דק׳ במטרו</li>
+        <li>🕓 צ׳ק־אאוט מאוחר עד 16:00 ביום האחרון, צריך לסגור עם המלון. ההסעה לשדה יוצאת בסביבות 16:00</li>
+        <li>💶 מס עירוני: משלמים במלון, במזומן או באשראי. בערך €7.50 לאדם ללילה במלון 4 כוכבים</li>
+      </ul>
+      <div class="tool-btns" style="margin-bottom:0">
+        <a class="act-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Hotel+White+Via+in+Arcione+77+Roma">📍 במפה</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="route">
+    <a class="stay d1" href="#day1">
+      <div class="ph" data-img="wiki:Trevi Fountain" data-fallback="⛲"></div>
+      <div class="body"><span class="nights">ראשון · 20.12</span><h3>נחיתה וטרווי בלילה</h3><p>נוחתים ב־18:50, מונית למלון, ארוחת ערב קרובה ומזרקת טרווי כמעט ריקה.</p></div>
+    </a>
+    <a class="stay d2" href="#day2">
+      <div class="ph" data-img="wiki:St. Peter's Basilica|wiki:St. Peter's Square" data-fallback="⛪"></div>
+      <div class="body"><span class="nights">שני · 21.12</span><h3>הוותיקן ופיאצה נבונה</h3><p>הקפלה הסיסטינית, בזיליקת פטרוס, שוק חג המולד בנבונה והפנתיאון.</p></div>
+    </a>
+    <a class="stay d3" href="#day3">
+      <div class="ph" data-img="wiki:Colosseum" data-fallback="🏛️"></div>
+      <div class="body"><span class="nights">שלישי · 22.12</span><h3>רומא העתיקה וטרסטוורה</h3><p>הקולוסיאום, הפורום, הקפיטול, הגטו היהודי וערב בטרסטוורה.</p></div>
+    </a>
+    <a class="stay d4" href="#day4">
+      <div class="ph" data-img="wiki:Spanish Steps" data-fallback="🪜"></div>
+      <div class="body"><span class="nights">רביעי · 23.12</span><h3>בוקר בבורגזה וטיסה</h3><p>המדרגות הספרדיות, תצפית הפינצ׳ו, גלריה בורגזה, ובסביבות 16:00 הסעה לשדה.</p></div>
+    </a>
+  </div>
+</section>
+
+<!-- ================= DAY 1 ================= -->
+<article class="day" id="day1">
+  <div class="day-head">
+    <div class="ph" data-img="commons:Fontana di Trevi at night.jpg|wiki:Trevi Fountain" data-fallback="⛲"></div>
+    <div class="day-title">
+      <span class="day-num">יום ראשון · 20.12</span>
+      <h3>נחיתה ברומא ← המלון ← מזרקת טרווי בלילה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="1"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos">🚨 חירום</a>
+      <span class="chip">🛬 נחיתה 18:50 · פיומיצ׳ינו (FCO)</span>
+      <span class="chip hotel">🛏️ White Hotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="key"><time>18:50</time><div class="what"><b>🛬 נחיתה בפיומיצ׳ינו (FCO), טיסה 6H347</b><small>ישראייר נוחתת בדרך כלל בטרמינל 3. ביקורת דרכונים ואיסוף מזוודות לוקחים בערך 30–50 דק׳</small></div></li>
+        <li class="walk"><time>19:40</time><div class="what">🚕 מונית במחיר קבוע למלון (€55 לכל המונית, עם מזוודות, בערך 40–50 דק׳). עומדים בתור המוניות הלבנות הרשמיות ביציאה מהטרמינל, ולא הולכים עם מי שמציע הסעה בתוך הטרמינל</div></li>
+        <li class="key"><time>20:35</time><div class="what"><b>🛏️ צ׳ק־אין ב־White Hotel</b><small>מבקשים כבר עכשיו צ׳ק־אאוט מאוחר עד 16:00 ביום רביעי, ושואלים על ההסעה לשדה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Hotel+White+Via+in+Arcione+77+Roma">📍 במפה</a></small></div></li>
+        <li class="food"><time>21:00</time><div class="what"><b>🍝 ארוחת ערב ב־Piccolo Arancio, 2 דק׳ מהמלון<button class="menu-btn" type="button" data-menu="menu-trattoria">📋 מה מזמינים</button></b><small>טרטוריה רומית קטנה בסמטה Vicolo Scanderbeg, מאחורי מזרקת טרווי. בערב יום ראשון מלא, אז מזמינים מקום מראש ומבקשים שולחן ל־21:00 · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Piccolo+Arancio+Vicolo+Scanderbeg+112+Roma">🚶 ניווט ברגל</a></small><small class="bk">🔁 חלופה מהירה יותר: פיצה רומית דקה או פיצה בחתיכות ברחובות Via del Lavatore או Via della Panetteria, 2–3 דק׳ מהמלון</small></div></li>
+        <li class="key"><time>22:15</time><div class="what"><b>⛲ מזרקת טרווי בלילה<span class="pay free">חינם אחרי 22:00</span></b><small>מאז 2026 הכניסה לאזור הסמוך למים עולה €2 בשעות 09:00–22:00. אחרי 22:00 נכנסים בחינם, ויש פחות אנשים. זורקים מטבע עם יד ימין מעל הכתף השמאלית, כדי לחזור לרומא · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Fontana+di+Trevi+Roma">🚶 ניווט ברגל</a></small><small class="bk">📅 בלי הזמנה. בשעות היום קונים כרטיס באתר fontanaditrevi.roma.it או במקום</small></div></li>
+        <li class="walk"><time>22:45</time><div class="what">🚶 סיבוב קצר באורות חג המולד: לאורך Via del Tritone ו־Via Due Macelli אל המדרגות הספרדיות וכיכר ספרד (כ־8 דק׳). משם חוזרים למלון (כ־10 דק׳) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Piazza+di+Spagna+Roma">🚶 ניווט ברגל</a></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Trevi Fountain" data-label="מזרקת טרווי" data-fallback="⛲"></div>
+          <div class="ph" data-img="wiki:Spanish Steps" data-label="המדרגות הספרדיות" data-fallback="🪜"></div>
+          <div class="ph" data-img="wiki:Via dei Condotti|wiki:Piazza di Spagna" data-label="כיכר ספרד" data-fallback="🎄"></div>
+        </div>
+        <div class="tip"><b>🚆 חלופה למונית:</b> רכבת Leonardo Express לתחנת Termini (€14 לאדם, 32 דק׳, יוצאת כל 15–30 דק׳), ומשם מונית קצרה או 20 דק׳ הליכה. בזוג, עם מזוודות ובשעת ערב, המונית במחיר קבוע עולה רק קצת יותר ומביאה אותנו ישר לדלת. כדאי לבדוק עם המלון אם יש להם הסעה במחיר דומה.</div>
+        <div class="alt"><b>💶 כסף:</b> מוציאים מעט אירו במזומן בכספומט של בנק בשדה, ולא בצ׳יינג׳. בכספומטים של Euronet מסרבים להמרה למטבע אחר (Decline conversion). במסעדות ובמוניות אפשר לשלם באשראי.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 2 ================= -->
+<article class="day" id="day2">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Sistine Chapel ceiling|wiki:Sistine Chapel" data-fallback="🎨"></div>
+    <div class="day-title">
+      <span class="day-num">יום שני · 21.12</span>
+      <h3>הוותיקן: הקפלה הסיסטינית ובזיליקת פטרוס ← פיאצה נבונה ← הפנתיאון</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="2"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos">🚨 חירום</a>
+      <span class="chip depart">⏰ יציאה 08:20</span>
+      <span class="chip book">🎟️ להזמין מראש: מוזיאוני הוותיקן</span>
+      <span class="chip">👗 כתפיים וברכיים מכוסות</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="food"><time>07:45</time><div class="what"><b>☕ ארוחת בוקר במלון</b><small>או קפוצ׳ינו וקורנטו בעמידה בבר, כמו הרומאים</small></div></li>
+        <li class="walk"><time>08:20</time><div class="what">🚶 8 דק׳ הליכה לתחנת Barberini ← 🚇 מטרו A לכיוון Battistini, 5 תחנות עד <b>Ottaviano</b> ← 🚶 10 דק׳ הליכה לכניסה למוזיאונים בשדרות Viale Vaticano · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=transit&destination=Musei+Vaticani+Viale+Vaticano+Roma">🚇 תחבורה ציבורית</a></div></li>
+        <li class="key"><time>09:00</time><div class="what"><b>🎨 מוזיאוני הוותיקן והקפלה הסיסטינית<span class="pay must">חובה להזמין</span></b><small>חדרי רפאל, גלריית המפות, הלאוקון והאפולו בבלוודר, ובסוף הקפלה הסיסטינית. בקפלה אסור לצלם ולדבר. לוקח בערך 3 שעות, וזה הרבה הליכה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Musei+Vaticani+Viale+Vaticano+Roma">🚶 ניווט ברגל</a></small><small class="oh">🕘 שני–שבת 08:00–20:00 (כניסה אחרונה 18:00). סגור בימי ראשון, ב־25 וב־26.12</small><small class="bk">📅 כרטיס בתאריך ובשעה, בערך €20 ועוד €5 להזמנה באינטרנט. מזמינים רק באתר הרשמי <a target="_blank" rel="noopener" href="https://tickets.museivaticani.va/home">museivaticani.va ↗</a>. השבוע שלפני חג המולד עמוס, אז מזמינים כמה שיותר מוקדם</small></div></li>
+        <li class="food"><time>12:15</time><div class="what"><b>🍕 צהריים: פיצה בחתיכות ב־Pizzarium של בונצ׳י<button class="menu-btn" type="button" data-menu="menu-pizzarium">📋 תפריט</button></b><small>פיצה רומית בחתיכות שמשלמים לפי משקל, וסופלי (כדור אורז מטוגן). אוכלים בעמידה. 10 דק׳ הליכה מהיציאה מהמוזיאונים, ליד תחנת Cipro · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Pizzarium+Bonci+Via+della+Meloria+43+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="walk"><time>13:00</time><div class="what">🚶 כ־20 דק׳ הליכה לאורך חומות הוותיקן לכיכר פטרוס הקדוש</div></li>
+        <li class="xmas"><time>13:20</time><div class="what"><b>🎄 כיכר פטרוס: עץ חג המולד ותצוגת המולד<span class="pay free">חינם</span></b><small>בכל דצמבר מציבים בכיכר עץ ענק ותצוגת מולד בגודל טבעי, ליד העמודים של ברניני</small></div></li>
+        <li class="key"><time>13:40</time><div class="what"><b>⛪ בזיליקת פטרוס הקדוש<span class="pay free">כניסה חינם</span></b><small>הפייטה של מיכלאנג׳לו והחופה של ברניני. יש בידוק ביטחוני, והתור זז מהר יותר בצהריים. רוצים תצפית? עולים לכיפה: 551 מדרגות, או מעלית ועוד 320 מדרגות. הנוף משם הוא הטוב ביותר ברומא · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Basilica+di+San+Pietro">🚶 ניווט ברגל</a></small><small class="oh">🕘 בדרך כלל 07:00–19:00. הכיפה נסגרת מוקדם יותר, בסביבות 17:00</small><small class="bk">📅 הבזיליקה בלי הזמנה. העלייה לכיפה בתשלום (בערך €10 במדרגות, €15 עם מעלית), לבדוק באתר. אם יש מיסה מיוחדת לפני החג, חלק מהבזיליקה עשוי להיות סגור</small></div></li>
+        <li class="walk"><time>15:30</time><div class="what">🚶 לאורך Via della Conciliazione לטירת סנט׳אנג׳לו (כ־10 דק׳)</div></li>
+        <li class="key"><time>15:45</time><div class="what"><b>🏰 טירת סנט׳אנג׳לו וגשר המלאכים<span class="pay free">מבחוץ חינם</span></b><small>חוצים את גשר Ponte Sant'Angelo עם פסלי המלאכים של ברניני, בדיוק לקראת השקיעה (בסביבות 16:40). הנוף על הנהר וכיפת פטרוס יפה במיוחד בשעה הזו · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Ponte+Sant%27Angelo+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="xmas"><time>16:30</time><div class="what"><b>🎠 שוק חג המולד בפיאצה נבונה<span class="pay free">חינם</span></b><small>דוכנים, קרוסלה, ממתקים וקישוטים סביב שלוש המזרקות, כולל מזרקת ארבעת הנהרות של ברניני. 12 דק׳ הליכה מהגשר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Piazza+Navona+Roma">🚶 ניווט ברגל</a></small><small class="bk">📅 השוק פועל בדרך כלל מתחילת דצמבר עד 6 בינואר. כדאי לבדוק שהוא נפתח השנה</small></div></li>
+        <li class="key"><time>17:30</time><div class="what"><b>🏛️ הפנתיאון<span class="pay paid">€7</span></b><small>המקדש הרומי השמור ביותר, עם הכיפה והפתח שבמרכזה. בדרך קפה ב־Sant'Eustachio Il Caffè (2 דק׳), ואחרי זה גלידה ב־Giolitti · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Pantheon+Roma">🚶 ניווט ברגל</a></small><small class="oh">🕘 כל יום 09:00–19:00, כניסה אחרונה 18:30</small><small class="bk">📅 קונים כרטיס באתר Musei Italiani או בקופה ליד הכניסה. בערב התור בדרך כלל קצר</small></div></li>
+        <li class="food"><time>19:30</time><div class="what"><b>🍝 ארוחת ערב ב־Armando al Pantheon<button class="menu-btn" type="button" data-menu="menu-trattoria">📋 מה מזמינים</button></b><small>טרטוריה משפחתית ותיקה, צמודה לפנתיאון. אין הרבה שולחנות, אז מזמינים באתר שלהם כמה שבועות מראש. חלופה בלי הזמנה: Da Francesco ליד פיאצה נבונה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Armando+al+Pantheon+Salita+de+Crescenzi+31+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="walk"><time>21:15</time><div class="what">🚶 חזרה למלון דרך Piazza di Pietra ו־Via delle Muratte (כ־12 דק׳) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Hotel+White+Via+in+Arcione+77+Roma">🚶 למלון</a></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:St. Peter's Square|wiki:St. Peter's Basilica" data-label="כיכר פטרוס הקדוש" data-fallback="⛪"></div>
+          <div class="ph" data-img="wiki:Castel Sant'Angelo" data-label="טירת סנט׳אנג׳לו" data-fallback="🏰"></div>
+          <div class="ph" data-img="wiki:Piazza Navona" data-label="פיאצה נבונה" data-fallback="🎠"></div>
+          <div class="ph wide" data-img="wiki:Pantheon, Rome" data-label="הפנתיאון" data-fallback="🏛️"></div>
+        </div>
+        <div class="tip"><b>👗 קוד לבוש:</b> בוותיקן ובכל הכנסיות צריך כתפיים וברכיים מכוסות, גם בחורף. מעיל שמורידים בפנים זה בסדר, אבל לא מכנסיים קצרים ולא גופייה. אסור להכניס סכין או מספריים.</div>
+        <div class="alt"><b>☔ אם יורד גשם:</b> הוותיקן ממילא בפנים. אפשר לוותר על טירת סנט׳אנג׳לו ולהיכנס ישר לפנתיאון (בגשם רואים את הטיפות נופלות דרך הפתח בכיפה), ולכנסיית San Luigi dei Francesi עם שלושת הציורים של קרוואג׳ו, בחינם, 3 דק׳ הליכה משם.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 3 ================= -->
+<article class="day" id="day3">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Roman Forum|wiki:Colosseum" data-fallback="🏛️"></div>
+    <div class="day-title">
+      <span class="day-num">יום שלישי · 22.12</span>
+      <h3>הקולוסיאום והפורום ← הקפיטול ← הגטו היהודי ← ערב בטרסטוורה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="3"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos">🚨 חירום</a>
+      <span class="chip depart">⏰ יציאה 08:30</span>
+      <span class="chip book">🎟️ להזמין מראש: הקולוסיאום</span>
+      <span class="chip">👟 היום הכי ארוך ברגל</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="food"><time>07:50</time><div class="what"><b>☕ ארוחת בוקר במלון</b></div></li>
+        <li class="walk"><time>08:30</time><div class="what">🚶 25 דק׳ הליכה (2 ק״מ) לקולוסיאום: דרך Piazza Venezia והוויטוריאנו, ואז לאורך Via dei Fori Imperiali, עם הפורומים של הקיסרים משני הצדדים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Colosseo+Roma">🚶 ניווט ברגל</a></div></li>
+        <li class="key"><time>09:00</time><div class="what"><b>🏛️ הקולוסיאום<span class="pay must">חובה להזמין</span></b><small>מגיעים 15 דק׳ לפני השעה בכרטיס. הכרטיס על שם, אז לוקחים דרכונים. בדרך כלל שעה–שעה וחצי בפנים</small><small class="oh">🕘 בחורף בערך 08:30–16:30</small><small class="bk">📅 כרטיס ל־24 שעות שכולל את הקולוסיאום, הפורום והפלטינו, בערך €18. מזמינים רק באתר הרשמי <a target="_blank" rel="noopener" href="https://ticketing.colosseo.it/en/">ticketing.colosseo.it ↗</a>. הכרטיסים נפתחים כחודש מראש ונגמרים מהר. אפשר לשדרג לכרטיס Full Experience עם הזירה או המרתפים</small></div></li>
+        <li class="key"><time>10:30</time><div class="what"><b>🏺 הפורום הרומי וגבעת הפלטינו<span class="pay free">באותו כרטיס</span></b><small>קשת טיטוס עם תבליט המנורה מבית המקדש, הדרך הקדושה (Via Sacra), בית הסנאט ובית הבתולות הווסטליות. מהגנים שעל הפלטינו יש נוף על כל הפורום. הקרקע לא ישרה, אז הולכים בנעליים נוחות</small></div></li>
+        <li class="food"><time>13:00</time><div class="what"><b>🍷 צהריים ברובע מונטי<button class="menu-btn" type="button" data-menu="menu-trattoria">📋 מה מזמינים</button></b><small>יוצאים מהפורום ליד Via Cavour ועולים לרובע מונטי, עם הסמטאות הקטנות והבוטיקים. למשל ב־Ai Tre Scalini, בר יין ומסעדה ברחוב Via Panisperna (לבדוק שעות). או שאוכלים משהו קטן ליד המזרקה בכיכר Piazza della Madonna dei Monti · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Piazza+della+Madonna+dei+Monti+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="key"><time>14:15</time><div class="what"><b>🏛️ גבעת הקפיטול (קמפידוליו)<span class="pay free">חינם</span></b><small>הכיכר שתכנן מיכלאנג׳לו. מאחורי בניין העירייה יש מרפסת עם התצפית הכי יפה על הפורום. רוצים עוד נוף? נכנסים ל־Terrazza Caffarelli, או עולים במעלית לגג הוויטוריאנו (בתשלום) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Piazza+del+Campidoglio+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="key"><time>15:00</time><div class="what"><b>🕍 הגטו היהודי ובית הכנסת הגדול<span class="pay paid">המוזיאון בתשלום</span></b><small>8 דק׳ הליכה. Portico d'Ottavia, הרחוב הראשי של הגטו, ובית הכנסת הגדול של רומא עם הכיפה המרובעת. בבית הכנסת נכנסים רק בסיור מודרך דרך המוזיאון היהודי (בערך €10) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Museo+Ebraico+di+Roma">🚶 ניווט ברגל</a></small><small class="oh">🕘 בחורף בדרך כלל ראשון–חמישי 10:00–17:00. השעות משתנות, אז בודקים באתר</small><small class="bk">📅 כדאי להזמין סיור באתר <a target="_blank" rel="noopener" href="https://www.museoebraico.roma.it/en/">museoebraico.roma.it ↗</a> · עוצרים לטעום עוגה ב־Pasticceria Boccione (תנור כשר ותיק, הולכים עד 18:00 בערך)</small></div></li>
+        <li class="walk"><time>16:15</time><div class="what">🚶 דרך גשר Ponte Fabricio, הגשר הרומי העתיק ביותר שעוד עומד, אל האי טיברינה, ומשם לטרסטוורה (כ־10 דק׳) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Isola+Tiberina+Roma">🚶 ניווט ברגל</a></div></li>
+        <li class="key"><time>16:30</time><div class="what"><b>🌆 טרסטוורה בשקיעה ובערב<span class="pay free">חינם</span></b><small>סמטאות מרוצפות עם קיסוסים, אורות חג המולד, והבזיליקה Santa Maria in Trastevere עם פסיפסי הזהב (כניסה חינם). מטיילים בלי לתכנן: Via della Lungaretta, Piazza di Santa Maria, Vicolo del Cinque · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Santa+Maria+in+Trastevere">🚶 ניווט ברגל</a></small></div></li>
+        <li class="food"><time>19:30</time><div class="what"><b>🥘 ארוחת ערב רומאית־יהודית ב־Ba'Ghetto, בגטו<button class="menu-btn" type="button" data-menu="menu-baghetto">📋 תפריט</button></b><small>מסעדה כשרה בשרית ב־Via del Portico d'Ottavia, 12 דק׳ הליכה חזרה מטרסטוורה. ארטישוק מטוגן ביהודית (carciofi alla giudia), פרחי קישוא ממולאים וקציצות. מזמינים מראש · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Ba%27Ghetto+Via+del+Portico+d%27Ottavia+57+Roma">🚶 ניווט ברגל</a></small><small class="bk">🔁 אם רוצים להישאר בטרסטוורה: Da Enzo al 29 (לא מקבלים הזמנות, מגיעים מוקדם לתור) או Tonnarello</small></div></li>
+        <li class="walk"><time>21:15</time><div class="what">🚶 חזרה למלון דרך Largo Argentina (שם רואים את המקדשים, ואת המקום שבו נרצח יוליוס קיסר), הפנתיאון המואר ו־Via del Corso (כ־20 דק׳). אם הרגליים עייפות: מונית מ־Largo Argentina, בערך €10 · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Hotel+White+Via+in+Arcione+77+Roma">🚶 למלון</a></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Colosseum" data-label="הקולוסיאום" data-fallback="🏛️"></div>
+          <div class="ph" data-img="wiki:Arch of Titus" data-label="קשת טיטוס" data-fallback="🏺"></div>
+          <div class="ph" data-img="wiki:Capitoline Hill|wiki:Piazza del Campidoglio" data-label="הקמפידוליו" data-fallback="🏛️"></div>
+          <div class="ph" data-img="wiki:Great Synagogue of Rome" data-label="בית הכנסת הגדול" data-fallback="🕍"></div>
+          <div class="ph" data-img="wiki:Trastevere" data-label="טרסטוורה" data-fallback="🌆"></div>
+        </div>
+        <div class="tip"><b>🕍 קשת טיטוס:</b> על הקשת מגולפים חיילים רומאים שנושאים את המנורה מבית המקדש אחרי חורבן ירושלים, בשנת 70. הקהילה היהודית ברומא היא מהעתיקות באירופה, ובגטו גרו היהודים מ־1555 עד 1870.</div>
+        <div class="alt"><b>🦵 לקצר את היום:</b> מוותרים על הפלטינו, או חוזרים ממונטי למלון לנוח שעה (15 דק׳ ברגל) ויוצאים לטרסטוורה בערב. מטרסטוורה לגטו אפשר לנסוע בחשמלית 8, וכרטיס BIT מכסה גם את האוטובוס חזרה למלון.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 4 ================= -->
+<article class="day" id="day4">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Piazza del Popolo|wiki:Pincian Hill" data-fallback="🌳"></div>
+    <div class="day-title">
+      <span class="day-num">יום רביעי · 23.12</span>
+      <h3>המדרגות הספרדיות ← הפינצ׳ו ← גלריה בורגזה ← הסעה לשדה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="4"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos">🚨 חירום</a>
+      <span class="chip depart">⏰ יציאה 08:45</span>
+      <span class="chip hotel">🕓 צ׳ק־אאוט מאוחר 16:00</span>
+      <span class="chip">🛫 המראה 20:10 · FCO</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="food"><time>08:00</time><div class="what"><b>☕ ארוחת בוקר במלון</b><small>משאירים את המזוודות בחדר, הצ׳ק־אאוט ב־16:00</small></div></li>
+        <li class="key"><time>08:45</time><div class="what"><b>🪜 המדרגות הספרדיות בבוקר, כשעוד אין אנשים<span class="pay free">חינם</span></b><small>8 דק׳ הליכה. מצטלמים לפני שמגיעים ההמונים ועולים לכנסייה Trinità dei Monti שבראש המדרגות. אסור לשבת על המדרגות, ויש קנס · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Trinit%C3%A0+dei+Monti+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="walk"><time>09:15</time><div class="what">🚶 לאורך Viale della Trinità dei Monti, דרך מדרכה עם נוף על הגגות, עד מרפסת הפינצ׳ו (כ־12 דק׳)</div></li>
+        <li class="key"><time>09:30</time><div class="what"><b>🌅 תצפית הפינצ׳ו ופיאצה דל פופולו<span class="pay free">חינם</span></b><small>מהמרפסת רואים את כיכר העם (Piazza del Popolo) עם האובליסק, ואת כיפת פטרוס באופק. אחר כך מטיילים בגני וילה בורגזה עד הגלריה (כ־20 דק׳ בשבילים) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Terrazza+del+Pincio+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="key"><time>11:00</time><div class="what"><b>🗿 גלריה בורגזה<span class="pay must">חובה להזמין</span></b><small>הפסלים של ברניני (אפולו ודפנה, אונס פרוסרפינה), פאולינה בורגזה של קנובה, וציורים של קרוואג׳ו ורפאל. הביקור מוגבל לשעתיים, בכניסה בשעה קבועה. משאירים את התיקים בשמירת החפצים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Galleria+Borghese+Roma">🚶 ניווט ברגל</a></small><small class="oh">🕘 שלישי–ראשון 09:00–19:00, כניסות כל שעתיים. סגור בימי שני</small><small class="bk">📅 בערך €16 ועוד €2 להזמנה. בלי הזמנה לא נכנסים. מזמינים באתר <a target="_blank" rel="noopener" href="https://galleriaborghese.cultura.gov.it/en/">galleriaborghese ↗</a>, רצוי לכניסה של 11:00. אם אין כרטיסים, מוותרים ומטיילים עוד בגנים ובוויה דל קורסו</small></div></li>
+        <li class="walk"><time>13:00</time><div class="what">🚶 יורדים דרך Porta Pinciana ו־Via Veneto לכיוון כיכר ספרד (כ־20 דק׳)</div></li>
+        <li class="food"><time>13:30</time><div class="what"><b>🍝 צהריים מהירים: פסטה ב־Pastificio Guerra<button class="menu-btn" type="button" data-menu="menu-trattoria">📋 מה מזמינים</button></b><small>חנות פסטה קטנה ב־Via della Croce, ליד כיכר ספרד. מנת פסטה טרייה של היום בכמה יורו, אוכלים בעמידה או בחוץ. חלופה לשבת: Antica Enoteca באותו רחוב · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Pastificio+Guerra+Via+della+Croce+8+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li class="key"><time>14:15</time><div class="what"><b>🛍️ טיול אחרון ליד המלון<span class="pay free">חינם</span></b><small>Via dei Condotti עם חלונות הראווה של חג המולד, Via del Corso, והגלריה המקורה Galleria Alberto Sordi. עוד הצצה לטרווי ביום (אפשר מלמעלה, בלי כרטיס). מסיימים בכיכר הקווירינל, 5 דק׳ מהמלון, עם נוף על הגגות, ובגלידה אחרונה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Piazza+del+Quirinale+Roma">🚶 ניווט ברגל</a></small></div></li>
+        <li><time>15:30</time><div class="what"><b>🧳 חזרה למלון, מתארגנים וצ׳ק־אאוט</b><small>משלמים את המס העירוני, אם לא שילמנו בהגעה</small></div></li>
+        <li class="walk"><time>16:00</time><div class="what">🚐 הסעה לשדה פיומיצ׳ינו (בערך 45–60 דק׳). ב־23.12 העומס בכבישים גדול, ולא כדאי לצאת אחרי 16:00</div></li>
+        <li><time>17:00</time><div class="what"><b>צ׳ק־אין בישראייר ובידוק ביטחוני</b><small>בטיסות לישראל מגיעים שלוש שעות לפני ההמראה. טרמינל 3, דלפקי ישראייר</small></div></li>
+        <li class="key"><time>20:10</time><div class="what"><b>🛫 המראה הביתה, טיסה 6H350</b><small>נחיתה בנתב״ג בסביבות 00:40 שעון ישראל (ישראל שעה אחת לפני רומא). Arrivederci, Roma! 👋</small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Galleria Borghese" data-label="גלריה בורגזה" data-fallback="🗿"></div>
+          <div class="ph" data-img="wiki:Apollo and Daphne (Bernini)" data-label="אפולו ודפנה, ברניני" data-fallback="🗿"></div>
+          <div class="ph" data-img="wiki:Villa Borghese gardens|wiki:Villa Borghese" data-label="גני וילה בורגזה" data-fallback="🌳"></div>
+        </div>
+        <div class="tip"><b>🧳 בוקר בלי מזוודות:</b> בגלל הצ׳ק־אאוט המאוחר, המזוודות נשארות בחדר ואפשר להתקלח לפני הטיסה. כדאי לבקש מהמלון אישור בכתב על צ׳ק־אאוט ב־16:00 ועל שעת ההסעה. עוד יום לפני, בודקים את הטיסה באפליקציה של ישראייר.</div>
+        <div class="alt"><b>💡 אם לא היו כרטיסים לבורגזה:</b> הולכים מהפינצ׳ו לכיכר העם ויורדים לאורך Via del Corso. או שנכנסים לגלריה Palazzo Barberini (8 דק׳ מהמלון, הדיוקן של רפאל וקרוואג׳ו). חלופה נוספת: קריפטת הקפוצ׳ינים ב־Via Veneto, עם עיטורים מעצמות של נזירים, סיור של 30 דק׳.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= IDEAS CATALOG ================= -->
+<section id="ideas">
+  <h2 class="sec">🎄 עוד רעיונות, רובם ליד המלון</h2>
+  <div class="xmas-head">
+    <span class="ic">🎄</span>
+    <p><b>רומא לפני חג המולד:</b> בכל כנסייה יש תצוגת מולד (presepe), והרחובות סביב כיכר ספרד ו־Via del Corso מקושטים באורות. החנויות פתוחות עד מאוחר, וב־23.12 הן מלאות במי שקונים מתנות של הרגע האחרון. נוח להחליף אטרקציה ביום גשם, או כשנשארות שעתיים פנויות.</p>
+  </div>
+  <div class="cat-filters" id="catFilters" role="group" aria-label="סינון רעיונות">
+    <button type="button" data-f="all" class="on">הכול</button>
+    <button type="button" data-f="free">🆓 חינם</button>
+    <button type="button" data-f="near">🏨 עד 10 דק׳ מהמלון</button>
+    <button type="button" data-f="view">🌅 תצפיות</button>
+    <button type="button" data-f="art">🎨 אמנות ומוזיאונים</button>
+    <button type="button" data-f="xmas">🎄 חג המולד</button>
+    <button type="button" data-f="food">🍨 אוכל</button>
+    <button type="button" data-f="rain">☔ ליום גשם</button>
+  </div>
+  <div class="cat-grid" id="catGrid"></div>
+  <p class="tool-note" style="margin-top:12px">זמני ההליכה הם מהמלון, בערך. המחירים מעוגלים ויכולים להשתנות, אז כדאי לבדוק לפני שהולכים.</p>
+</section>
+
+<!-- ================= BOOKING CHECKLIST ================= -->
+<section id="book">
+  <h2 class="sec">🎟️ מה להזמין מראש</h2>
+  <p class="sec-sub">הסימונים נשמרים בטלפון הזה. בכל הכרטיסים יש שם ותאריך, ומביאים דרכון.</p>
+  <ul class="checklist" id="checklist">
+    <li><label><input type="checkbox" data-k="colos"><span><b>🏛️ הקולוסיאום, שלישי 22.12, בשעה 09:00</b><small>ticketing.colosseo.it · הכרטיסים נפתחים כחודש מראש ונגמרים תוך דקות. בערך €18 לאדם</small></span></label></li>
+    <li><label><input type="checkbox" data-k="vat"><span><b>🎨 מוזיאוני הוותיקן, שני 21.12, בשעה 09:00</b><small>tickets.museivaticani.va · בערך €25 לאדם עם דמי ההזמנה. רק באתר הרשמי</small></span></label></li>
+    <li><label><input type="checkbox" data-k="borg"><span><b>🗿 גלריה בורגזה, רביעי 23.12, בשעה 11:00</b><small>האתר של הגלריה · בערך €18 לאדם. בלי הזמנה לא נכנסים</small></span></label></li>
+    <li><label><input type="checkbox" data-k="r1"><span><b>🍝 Piccolo Arancio, ראשון 20.12, בשעה 21:00</b><small>טלפון או אתר המסעדה. הנחיתה ב־18:50, אז לא להזמין לפני 21:00</small></span></label></li>
+    <li><label><input type="checkbox" data-k="r2"><span><b>🍝 Armando al Pantheon, שני 21.12, בשעה 19:30</b><small>הזמנות באתר שלהם, נפתחות כחודש מראש</small></span></label></li>
+    <li><label><input type="checkbox" data-k="r3"><span><b>🥘 Ba'Ghetto, שלישי 22.12, בשעה 19:30</b><small>אתר המסעדה או טלפון</small></span></label></li>
+    <li><label><input type="checkbox" data-k="jm"><span><b>🕍 סיור במוזיאון היהודי ובבית הכנסת, שלישי 22.12, בסביבות 15:00</b><small>museoebraico.roma.it · לבדוק שעות בדצמבר</small></span></label></li>
+    <li><label><input type="checkbox" data-k="hotel"><span><b>🏨 אישור מהמלון: צ׳ק־אאוט מאוחר ב־16:00 והסעה לשדה ב־23.12</b><small>לבקש במייל, ולשמור את התשובה</small></span></label></li>
+    <li><label><input type="checkbox" data-k="ins"><span><b>🛡️ ביטוח נסיעות וכרטיס אשראי בלי עמלת המרה</b><small>וגם להודיע לבנק על הנסיעה</small></span></label></li>
+  </ul>
+</section>
+
+<!-- ================= WEBCAMS ================= -->
+<section id="cams">
+  <h2 class="sec">📷 מצלמות לייב</h2>
+  <p class="sec-sub">מה מזג האוויר עכשיו, וכמה אנשים יש בכיכרות. לחיצה פותחת את המצלמה ב־SkylineWebcams.</p>
+  <div class="cams" id="camGrid"></div>
+</section>
+
+<!-- ================= COSTS ================= -->
+<section id="costs">
+  <h2 class="sec">💰 סיכום עלויות</h2>
+  <p class="sec-sub">הערכה לזוג: כניסות, תחבורה, ארוחות ומס עירוני. את מחיר הטיסות והמלון משלימים כאן, והסכום מתעדכן. בכל יום מוצג גם הסכום של אותו יום.</p>
+  <div class="cost-wrap">
+    <div class="panel">
+      <h3>פירוט בשקלים</h3>
+      <table class="costs" id="costTable"></table>
+    </div>
+    <div class="panel">
+      <h3>הנחות החישוב</h3>
+      <div class="inputs">
+        <label>מספר מטיילים<input type="number" id="inPeople" min="1" max="10" value="2"></label>
+        <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.80"></label>
+        <label>טיסות ישראייר, הלוך וחזור (₪ לכולם)<input type="number" id="inFlights" min="0" step="10" value="0" placeholder="להשלים"></label>
+        <label>מלון, 3 לילות (€)<input type="number" id="inHotel" min="0" step="10" value="0" placeholder="להשלים"></label>
+        <label>הסעה לשדה ביום החזרה (€)<input type="number" id="inShuttle" min="0" step="5" value="60"></label>
+        <label>רמת הארוחות<select id="inMeals"><option value="0.75">חסכונית</option><option value="1" selected>רגילה</option><option value="1.4">מפנקת</option></select></label>
+      </div>
+      <div class="live-note" id="liveNote">⏳ טוען שער יורו עדכני…</div>
+      <div class="big-total"><span>סה״כ לטיול (משוער)</span><b id="grandTotal">—</b><span id="grandSub"></span></div>
+      <div class="assume">
+        המחירים לפי מחירוני 2026, מעוגלים. הם עשויים להשתנות:
+        <ul>
+          <li>הקולוסיאום, הפורום והפלטינו בכרטיס אחד: כ־€18 · מוזיאוני הוותיקן: €20 ועוד €5 להזמנה · גלריה בורגזה: כ־€16 ועוד €2 · הפנתיאון: €7 (מיולי 2026)</li>
+          <li>לא נכללים בסכום: הכיפה של פטרוס (€10–15), המוזיאון היהודי (כ־€10), המעלית בוויטוריאנו, ומזרקת טרווי ביום (€2). בלילה טרווי בחינם</li>
+          <li>תחבורה: מונית מהשדה במחיר קבוע (€55) · 4 נסיעות במטרו או באוטובוס, €1.50 כל אחת · הסעה לשדה לפי המחיר שנסגור</li>
+          <li>ארוחות לאדם, ברמה רגילה: צהריים קלים כ־€15, ארוחת ערב במסעדה כ־€40 (כולל יין בית ו־coperto), קפה וגלידה כ־€8 ליום. ארוחת הבוקר במלון לא נספרת</li>
+          <li>מס עירוני: כ־€7.50 לאדם ללילה במלון 4 כוכבים. משלמים במלון</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SOS ================= -->
+<section id="sos">
+  <h2 class="sec">🚨 מספרי חירום</h2>
+  <p class="sec-sub">לחיצה על מספר מחייגת ישר מהטלפון. בכל מצב של סכנת חיים מתקשרים ל־<b>112</b>. המספר עובד בכל איטליה, בחינם, וגם בלי כרטיס SIM.</p>
+  <div class="sos-grid">
+    <div class="sos-card">
+      <h3>🇮🇹 באיטליה</h3>
+      <p class="sos-sub">כל הימים</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:112">🆘 חירום: אמבולנס, משטרה, כבאות<b>112</b></a>
+        <a class="tel" href="tel:118">🚑 אמבולנס (מועבר ל־112)<b>118</b></a>
+        <a class="tel" href="tel:113">🚓 משטרה<b>113</b></a>
+        <a class="tel" href="tel:+39063570">🚕 רדיו טקסי רומא<b>06 3570</b></a>
+      </div>
+      <p class="sos-note">💊 בתי מרקחת: מחפשים „Farmacia“ עם צלב ירוק. בכל לילה יש בית מרקחת תורן (farmacia di turno), והרשימה מופיעה על הדלת של כל בית מרקחת.</p>
+    </div>
+    <div class="sos-card">
+      <h3>🏥 בתי חולים ליד המלון</h3>
+      <p class="sos-sub">חדר מיון (Pronto Soccorso), 24/7</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+390668371">🏥 Fatebenefratelli, האי טיברינה<b>06 68371</b></a>
+        <a class="tel" href="tel:+390649971">🏥 Policlinico Umberto I<b>06 49971</b></a>
+        <a class="tel" href="tel:+390668351">🏥 Santo Spirito, ליד הוותיקן<b>06 68351</b></a>
+      </div>
+      <p class="sos-note">📍 המיון ב־Fatebenefratelli נמצא על האי טיברינה, כ־20 דק׳ מהמלון · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Ospedale+Fatebenefratelli+Isola+Tiberina">🗺️ ניווט</a>. במקרה דחוף לוקחים מונית או מתקשרים ל־112.</p>
+    </div>
+    <div class="sos-card">
+      <h3>🇮🇱 שגרירות ישראל ברומא</h3>
+      <p class="sos-sub">לאובדן דרכון, מעצר או מקרה חירום</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+390636198500">📞 השגרירות, Via Michele Mercati 14<b>+39 06 3619 8500</b></a>
+        <a class="tel" href="tel:+97225303155">📞 מוקד החירום של משרד החוץ בירושלים<b>+972 2 530 3155</b></a>
+      </div>
+      <p class="sos-note">כדאי לבדוק את המספרים באתר השגרירות לפני הטיסה, ולצלם את הדרכונים ולשמור בענן. לכרטיס אשראי שנגנב מתקשרים למספר שמופיע בגב הכרטיס, או בוחרים „הקפאה“ באפליקציה.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tips">
+  <h2 class="sec">טיפים חשובים לפני שיוצאים</h2>
+  <p class="sec-sub">סוף דצמבר ברומא: 10–15° ביום, קר בבוקר ובערב, ויש סיכוי לגשם. מחשיך כבר ב־16:40.</p>
+  <div class="tips">
+    <div class="tipcard"><div class="ico">🎟️</div><h3>להזמין עכשיו</h3><p>הקולוסיאום, הוותיקן ובורגזה רק באתרים הרשמיים. באתרים אחרים המחירים כפולים, ולפעמים מוכרים שם כרטיסים מזויפים. ב־21–23.12 התיירים מציפים את העיר.</p></div>
+    <div class="tipcard"><div class="ico">👟</div><h3>נעליים ושכבות</h3><p>הולכים 8–13 ק״מ ביום על אבני מרצפת (sampietrini). לוקחים נעליים נוחות שכבר הלכנו בהן, מעיל קל, צעיף ומטרייה קטנה.</p></div>
+    <div class="tipcard"><div class="ico">🚫</div><h3>בלי חזיר ובלי פירות ים</h3><p>בקרבונרה, באמטריצ׳אנה ובגריצ׳ה יש גואנצ׳לה (לחי חזיר). Prosciutto, pancetta, speck ו־salsiccia הם חזיר. מזמינים cacio e pepe, פסטה ברוטב עגבניות (pomodoro), ארטישוק או דג. בפסטה ובריזוטו עם frutti di mare או gamberi יש פירות ים ושרימפס. משפט שימושי: <bdi>„senza maiale e senza frutti di mare, per favore“</bdi>.</p></div>
+    <div class="tipcard"><div class="ico">☕</div><h3>להתנהג כמו רומאי</h3><p>קפה בעמידה בבר זול יותר (בערך €1.30 לאספרסו). קפוצ׳ינו שותים רק בבוקר. במסעדות מוסיפים לחשבון coperto (כמה יורו לאדם), וטיפ לא חובה: מעגלים כלפי מעלה.</p></div>
+    <div class="tipcard"><div class="ico">👜</div><h3>כייסים</h3><p>בטרווי, במטרו A, באוטובוס 64 ובשווקים. התיק עם רוכסן ולפנים, והטלפון לא על השולחן. לא נעצרים ליד מי שמציעים צמידים, ורדים או „עצומה“.</p></div>
+    <div class="tipcard"><div class="ico">💧</div><h3>מים בחינם</h3><p>בכל העיר יש ברזיות ברזל (nasoni) עם מים קרים וטובים לשתייה. ממלאים בקבוק, ולא קונים בקבוק ב־€3 ליד האתרים.</p></div>
+  </div>
+</section>
+
+</main>
+
+<h2 class="sec menus-title print-only">📋 תפריטים</h2>
+<dialog class="menu-dlg" id="menu-trattoria" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <span class="tag">📋 מה מזמינים בטרטוריה רומית</span>
+    <h4>המנות הקלאסיות, בלי חזיר ובלי פירות ים</h4>
+    <p>זה תפריט כללי, לא של מסעדה מסוימת. במסעדות בעיר העתיקה המחירים בדרך כלל כאלה.</p>
+    <table class="menu">
+      <tr><td>קאצ׳ו א פפה: פסטה עם פקורינו ופלפל שחור<i>Tonnarelli cacio e pepe</i></td><td class="pr">~€14</td></tr>
+      <tr><td>ארטישוק רומאי מבושל, בעונה בדצמבר<i>Carciofo alla romana</i></td><td class="pr">~€8</td></tr>
+      <tr><td>סופלי: כדור אורז ממולא מוצרלה (לשאול שאין בשר)<i>Supplì</i></td><td class="pr">~€3</td></tr>
+      <tr><td>פסטה ברוטב עגבניות ובזיליקום<i>Pasta al pomodoro</i></td><td class="pr">~€12</td></tr>
+      <tr><td>סלטימבוקה (מגיעה עם פרושוטו, לא להזמין!) ← במקומה: קציצות ברוטב<i>Polpette al sugo</i></td><td class="pr">~€14</td></tr>
+      <tr><td>טירמיסו<i>Tiramisù</i></td><td class="pr">~€7</td></tr>
+    </table>
+    <div class="note">* המחירים משוערים. לבקש „senza guanciale / senza maiale“. גם ב־amatriciana וב־gricia יש חזיר.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-pizzarium" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <span class="tag">📋 תפריט צהריים</span>
+    <h4>Pizzarium Bonci, ליד הוותיקן</h4>
+    <p>פיצה בחתיכות בתבניות ארוכות. מראים כמה לחתוך, החתיכה נשקלת ומשלמים לפי המשקל. התוספות משתנות כל יום.</p>
+    <table class="menu">
+      <tr><td>פיצה מרגריטה / עגבניות ובזיליקום, לחתיכה<i>Pizza al taglio, margherita / rossa</i></td><td class="pr">~€4</td></tr>
+      <tr><td>פיצה תפוחי אדמה ורוזמרין<i>Patate e rosmarino</i></td><td class="pr">~€4</td></tr>
+      <tr><td>פיצה עם ירקות עונתיים וגבינות<i>Verdure di stagione</i></td><td class="pr">~€5</td></tr>
+      <tr><td>סופלי קלאסי (יש בו רוטב בשר, לשאול)<i>Supplì classico</i></td><td class="pr">~€2.50</td></tr>
+    </table>
+    <div class="note">* המחירים משוערים, לפי משקל. הרבה מהפיצות מגיעות עם מורטדלה, נקניק או אנשובי, אז שואלים לפני שמזמינים.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-baghetto" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <span class="tag">📋 ארוחת ערב · כשר</span>
+    <h4>Ba'Ghetto, הגטו היהודי</h4>
+    <p>מטבח רומאי־יהודי ב־Via del Portico d'Ottavia. המסעדה בשרית וכשרה, אז אין בעיה עם חזיר או פירות ים.</p>
+    <table class="menu">
+      <tr><td>ארטישוק מטוגן ביהודית<i>Carciofo alla giudia</i></td><td class="pr">~€9</td></tr>
+      <tr><td>פרחי קישוא ממולאים ומטוגנים<i>Fiori di zucca</i></td><td class="pr">~€8</td></tr>
+      <tr><td>פסטה עם ארטישוק / קאצ׳ו א פפה בגרסה פרווה<i>Pasta ai carciofi</i></td><td class="pr">~€15</td></tr>
+      <tr><td>קציצות בקר ברוטב עגבניות<i>Polpette al sugo</i></td><td class="pr">~€18</td></tr>
+      <tr><td>שניצל עוף ברומאית<i>Cotoletta di pollo</i></td><td class="pr">~€18</td></tr>
+    </table>
+    <div class="note">* המחירים משוערים. בכמה מסעדות בגטו מגישים „carbonara“ עם פסטרמה של אווז או בקר במקום חזיר.</div>
+  </div>
+</dialog>
+
+<button class="to-top" id="toTop" aria-label="חזרה לראש הדף" title="חזרה לראש הדף">↑</button>
+
+<footer>
+  נבנה באהבה לטיול הזוגי שלנו 🏛️ · התמונות מ־<a href="https://www.wikipedia.org" target="_blank" rel="noopener">ויקיפדיה</a> ומ־Wikimedia Commons, ברישיונות Creative Commons. מעבר עם העכבר על תמונה מציג קישור לעמוד המקור.<br>
+  מזג האוויר הוא ממוצע היסטורי לסוף דצמבר, וכשבועיים לפני הטיול הוא יתחלף בתחזית. זמני ההליכה, שעות הפתיחה, המחירים והמסעדות משוערים, וכדאי לבדוק אותם לפני כל יום.
+</footer>
+
+<script>
+/* ---------- trip config ---------- */
+window.TRIP_FLIGHTS = [
+  // airline: IATA code, no: flight number, date: the date at Ben Gurion, tlvTime: the Ben Gurion time if known (leave null to skip the time check)
+  { id: "flt-out",  airline: "6H", no: "347", date: "2026-12-20", dep: null,    arr: "18:50", tlvTime: null, dir: "D", label: "המראה מנתב״ג" },
+  { id: "flt-back", airline: "6H", no: "350", date: "2026-12-24", dep: "20:10", arr: null,    tlvTime: null, dir: "A", label: "נחיתה בנתב״ג" }
+];
+window.HOTEL = { n: "White Hotel", ll: [41.9021, 12.4852], ph: "img/hotels/white.jpg|wiki:Trevi Fountain" };
+
+/* ---------- ideas catalog (st: free / pay, t: tags, walk: minutes from the hotel) ---------- */
+window.CATALOG = [
+  { n: "שוק חג המולד בפיאצה נבונה", e: "🎠", st: "free", t: ["xmas","food"], walk: 15, ll: [41.8992, 12.4731], day: "day2",
+    p: "דוכנים, קרוסלה וממתקים סביב המזרקות של ברניני.", price: "חינם", img: "wiki:Piazza Navona" },
+  { n: "עץ חג המולד והמולד בכיכר פטרוס", e: "🎄", st: "free", t: ["xmas"], walk: 40, ll: [41.9022, 12.4568], day: "day2",
+    p: "עץ ענק ותצוגת מולד בגודל טבעי, שמוצבים בכל דצמבר.", price: "חינם", img: "wiki:St. Peter's Square" },
+  { n: "כיכר הקווירינל", e: "🏛️", st: "free", t: ["view","near"], walk: 5, ll: [41.8996, 12.4870], day: "day4",
+    p: "כיכר על גבעה מול ארמון הנשיא, עם נוף על הגגות ועל כיפת פטרוס. בשקיעה יפה במיוחד.", price: "חינם", img: "wiki:Piazza del Quirinale|wiki:Quirinal Palace" },
+  { n: "גג Rinascente ב־Via del Tritone", e: "🛍️", st: "free", t: ["view","rain","near","food"], walk: 4, ll: [41.9030, 12.4840],
+    p: "כלבו עם קומת אוכל ומרפסת על הגג, מול הגגות של רומא. מקום טוב לקפה ביום גשם.", price: "הכניסה חינם", img: "wiki:La Rinascente" },
+  { n: "Galleria Alberto Sordi", e: "🛍️", st: "free", t: ["rain","near","xmas"], walk: 7, ll: [41.9010, 12.4800], day: "day4",
+    p: "פסאז׳ מקורה מתחילת המאה ה־20 עם תקרת זכוכית. בדצמבר מקושט לחג.", price: "חינם", img: "wiki:Galleria Alberto Sordi" },
+  { n: "Palazzo Barberini", e: "🎨", st: "pay", t: ["art","rain","near"], walk: 8, ll: [41.9035, 12.4900],
+    p: "ארמון בארוק עם הפורנרינה של רפאל, יהודית והולופרנס של קרוואג׳ו, ותקרה ענקית מצוירת.", price: "בערך €15 · סגור בשני", img: "wiki:Palazzo Barberini" },
+  { n: "קריפטת הקפוצ׳ינים", e: "💀", st: "pay", t: ["rain","art","near"], walk: 9, ll: [41.9048, 12.4888],
+    p: "חדרים מעוטרים בעצמות של אלפי נזירים, מתחת לכנסייה ב־Via Veneto. מוזר ומרתק, בערך 40 דק׳.", price: "בערך €10", img: "wiki:Capuchin Crypt" },
+  { n: "San Luigi dei Francesi", e: "🖼️", st: "free", t: ["art","rain","free"], walk: 13, ll: [41.8996, 12.4746], day: "day2",
+    p: "שלושה ציורים של קרוואג׳ו על חייו של מתי הקדוש, בכנסייה ליד הפנתיאון. מכניסים מטבע כדי להדליק את האור.", price: "חינם", img: "wiki:San Luigi dei Francesi" },
+  { n: "מעלית הגג של הוויטוריאנו", e: "🌅", st: "pay", t: ["view"], walk: 12, ll: [41.8946, 12.4831], day: "day3",
+    p: "מעלית זכוכית לגג האנדרטה הלבנה בפיאצה ונציה, עם נוף של 360° על הפורום והקולוסיאום.", price: "בערך €15 · לבדוק", img: "wiki:Victor Emmanuel II Monument" },
+  { n: "חור המנעול וגן התפוזים באוונטינו", e: "🔑", st: "free", t: ["view","free"], walk: 40, ll: [41.8834, 12.4797],
+    p: "מציצים דרך חור המנעול של מסדר מלטה ורואים את כיפת פטרוס. ליד יש גן תפוזים עם תצפית על הנהר.", price: "חינם", img: "wiki:Giardino degli Aranci|wiki:Aventine Hill" },
+  { n: "תצפית הג׳אניקולו", e: "🌇", st: "free", t: ["view","free"], walk: 45, ll: [41.8920, 12.4612], day: "day3",
+    p: "הגבעה מעל טרסטוורה, עם אחד הנופים הפנורמיים הכי יפים של העיר. כדאי להגיע לשקיעה ב־16:40.", price: "חינם · עלייה תלולה", img: "wiki:Janiculum" },
+  { n: "Santa Maria Maggiore", e: "⛪", st: "free", t: ["xmas","art","rain","free"], walk: 20, ll: [41.8976, 12.4984],
+    p: "בזיליקה עם פסיפסים מהמאה ה־5. לפי המסורת, כאן שמורים שרידי האבוס של ישו, ובחג המולד יש כאן חגיגות גדולות.", price: "חינם", img: "wiki:Santa Maria Maggiore" },
+  { n: "המוזיאונים הקפיטוליניים", e: "🗿", st: "pay", t: ["art","rain"], walk: 13, ll: [41.8929, 12.4826], day: "day3",
+    p: "הזאבה הקפיטולינית, פסל הרכיבה של מרקוס אורליוס ותצפית על הפורום מבית הקפה.", price: "בערך €15 · לבדוק", img: "wiki:Capitoline Museums" },
+  { n: "Giolitti וגלידה", e: "🍨", st: "pay", t: ["food","near"], walk: 10, ll: [41.9009, 12.4767], day: "day2",
+    p: "גלידרייה ותיקה מ־1900 ליד הפרלמנט. בקרבת המלון יש גם את Il Gelato di San Crispino ואת Venchi.", price: "בערך €4", img: "wiki:Giolitti|wiki:Gelato" },
+  { n: "Sant'Eustachio Il Caffè", e: "☕", st: "pay", t: ["food"], walk: 12, ll: [41.8981, 12.4755], day: "day2",
+    p: "בית קפה מ־1938 שקולה בעצמו. מזמינים „gran caffè“, אספרסו מוקצף ומתוק.", price: "בערך €2", img: "wiki:Sant'Eustachio, Rome|wiki:Pantheon, Rome" },
+  { n: "Campo de' Fiori", e: "🌸", st: "free", t: ["food","free"], walk: 17, ll: [41.8956, 12.4722],
+    p: "שוק ירקות ופרחים בבוקר. בערב הכיכר מתמלאת בברים.", price: "חינם", img: "wiki:Campo de' Fiori" }
+];
+
+/* ---------- webcams (SkylineWebcams pages) ---------- */
+window.CAMS = [
+  { n: "🏛️ הקולוסיאום", e: "🏛️", when: "שלישי 22.12", ph: "wiki:Colosseum", href: "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/roma-colosseo.html" },
+  { n: "🎠 פיאצה נבונה", e: "🎠", when: "שני 21.12", ph: "wiki:Piazza Navona", href: "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/piazza-navona-roma.html" },
+  { n: "⛲ פיאצה ברבריני, ליד המלון", e: "⛲", when: "כל יום", ph: "wiki:Piazza Barberini|wiki:Triton Fountain", href: "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/piazza-barberini.html" },
+  { n: "🏛️ פיאצה ונציה", e: "🏛️", when: "שלישי 22.12", ph: "wiki:Piazza Venezia", href: "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/roma-piazza-venezia.html" },
+  { n: "🌇 קו הרקיע של רומא", e: "🌇", when: "כל יום", ph: "wiki:Rome", href: "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/roma-skyline.html" },
+  { n: "📷 כל המצלמות ברומא (כולל טרווי)", e: "📷", when: "כל יום", ph: "wiki:Spanish Steps", href: "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma.html" }
+];
+</script>
+<script>
+/* ---------- photos (with fallbacks) ---------- */
+(function(){
+  document.querySelectorAll(".ph[data-img]").forEach(function(box){
+    var list = box.getAttribute("data-img").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+    var label = box.getAttribute("data-label");
+    var wide = box.closest(".hero") || box.closest(".day-head");
+    var width = wide ? 1600 : 800;
+    var fb = document.createElement("div");
+    fb.className = "ph-fallback";
+    fb.textContent = box.getAttribute("data-fallback") || "🏛️";
+    box.appendChild(fb);
+    var img = document.createElement("img");
+    img.alt = label || "";
+    img.decoding = "async";
+    box.appendChild(img);
+    if (label){
+      var l = document.createElement("div");
+      l.className = "ph-label";
+      l.textContent = label;
+      box.appendChild(l);
+    }
+    img._fail = function(){ box.classList.add("failed"); img.remove(); };
+    function start(){
+      fillImg(img, list, width, function(r){
+        img.classList.add("ok");
+        if (!r.page) return;
+        var a = document.createElement("a");
+        a.className = "credit"; a.href = r.page; a.target = "_blank"; a.rel = "noopener";
+        a.textContent = "📷 מקור";
+        box.appendChild(a);
+      });
+    }
+    if (box.closest(".hero") || !("IntersectionObserver" in window)) start();
+    else {
+      var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ io.disconnect(); start(); } }); }, { rootMargin: "600px" });
+      io.observe(box);
+      box._start = function(){ io.disconnect(); start(); };
+    }
+  });
+})();
+
+/* ---------- ideas catalog ---------- */
+(function(){
+  var grid = document.getElementById("catGrid"), bar = document.getElementById("catFilters");
+  var ST = { free: "🆓 חינם", pay: "💶 בתשלום" };
+  var DAYS = { day1: "20.12", day2: "21.12", day3: "22.12", day4: "23.12" };
+  function nav(o){ return "https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + o.ll[0] + "," + o.ll[1]; }
+  grid.innerHTML = CATALOG.map(function(o, i){
+    return '<article class="cat" data-i="' + i + '">' +
+      '<div class="ph" data-img="' + o.img + '" data-fallback="' + o.e + '"></div>' +
+      '<div class="cb"><span class="st ' + o.st + '">' + ST[o.st] + '</span>' +
+      '<h3>' + o.e + ' ' + o.n + '</h3><p>' + o.p + '</p><p><b>' + o.price + '</b></p>' +
+      '<div class="meta2"><span>🚶 ' + o.walk + ' דק׳ מהמלון</span>' +
+      (o.day ? '<a href="#' + o.day + '">📅 קרוב למסלול של ' + DAYS[o.day] + '</a>' : '') +
+      '<a target="_blank" rel="noopener" href="' + nav(o) + '">🗺️ ניווט ברגל</a></div></div></article>';
+  }).join("");
+  grid.querySelectorAll(".ph[data-img]").forEach(function(box){
+    var list = box.getAttribute("data-img").split("|");
+    var fb = document.createElement("div"); fb.className = "ph-fallback"; fb.textContent = box.getAttribute("data-fallback"); box.appendChild(fb);
+    var img = document.createElement("img"); img.alt = ""; img.loading = "lazy"; box.appendChild(img);
+    img._fail = function(){ box.classList.add("failed"); img.remove(); };
+    fillImg(img, list, 600, function(){ img.classList.add("ok"); });
+  });
+  bar.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    bar.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    var f = b.getAttribute("data-f"), shown = 0;
+    grid.querySelectorAll(".cat").forEach(function(card){
+      var o = CATALOG[+card.getAttribute("data-i")];
+      var ok = f === "all" || (f === "free" ? o.st === "free" : f === "near" ? o.walk <= 10 : o.t.indexOf(f) >= 0);
+      card.hidden = !ok; if (ok) shown++;
+    });
+    var empty = grid.querySelector(".cat-empty");
+    if (!shown && !empty){ empty = document.createElement("p"); empty.className = "cat-empty"; empty.textContent = "אין רעיונות בסינון הזה"; grid.appendChild(empty); }
+    if (empty) empty.hidden = !!shown;
+  });
+})();
+
+/* ---------- webcams ---------- */
+(function(){
+  var camGrid = document.getElementById("camGrid");
+  camGrid.innerHTML = CAMS.map(function(c){
+    return '<a class="cam" target="_blank" rel="noopener" href="' + c.href + '"><div class="cam-img"><span class="cam-emoji">' + c.e + '</span>' + lazyImg(c.ph, 500, "", c.n) +
+      '<span class="cam-live">● LIVE</span><span class="cam-go">פתח ↗</span></div>' +
+      '<div class="cam-cap"><b>' + c.n + '</b><small>' + c.when + '</small></div></a>';
+  }).join("");
+  hydrateImgs(camGrid);
+})();
+
+/* ---------- booking checklist (saved on this phone) ---------- */
+(function(){
+  var KEY = "rome.book";
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){}
+  document.querySelectorAll("#checklist input[data-k]").forEach(function(cb){
+    cb.checked = !!saved[cb.getAttribute("data-k")];
+    cb.addEventListener("change", function(){
+      saved[cb.getAttribute("data-k")] = cb.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(e){}
+    });
+  });
+})();
+
+/* ---------- dialogs: menus + tools ---------- */
+function openDlg(d){ if (!d) return; if (d.showModal) d.showModal(); else d.setAttribute("open", ""); }
+document.querySelectorAll(".menu-btn").forEach(function(btn){
+  btn.addEventListener("click", function(){ openDlg(document.getElementById(btn.getAttribute("data-menu"))); });
+});
+document.getElementById("homeBtn").addEventListener("click", function(){ openDlg(document.getElementById("homeDlg")); });
+document.getElementById("metroBtn").addEventListener("click", function(){ openDlg(document.getElementById("metroDlg")); });
+document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d){
+  d.querySelector(".dlg-x").addEventListener("click", function(){ d.close(); });
+  d.addEventListener("click", function(e){ if (e.target === d) d.close(); });
+});
+
+/* ---------- share & PDF ---------- */
+(function(){
+  var toastEl = document.getElementById("toast"), tt;
+  function toast(msg){ toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600); }
+  function pageUrl(){ return location.href.split("#")[0]; }
+  document.getElementById("shareBtn").addEventListener("click", function(){
+    var data = { title: "רומא ברגל – 4 ימים לפני חג המולד 🏛️🎄", text: "המסלול שלנו לרומא 🏛️🎄", url: pageUrl() };
+    if (navigator.share){ navigator.share(data).catch(function(){}); return; }
+    var wa = function(){ window.open("https://wa.me/?text=" + encodeURIComponent(data.text + " " + data.url), "_blank"); };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(data.url).then(function(){ toast("🔗 הקישור הועתק. אפשר להדביק בוואטסאפ או במייל"); }, wa);
+    } else wa();
+  });
+  function loadAllImages(maxWait){
+    document.querySelectorAll(".ph").forEach(function(b){ if (b._start) b._start(); });
+    return new Promise(function(res){ setTimeout(res, 1200); }).then(function(){
+      var imgs = Array.prototype.slice.call(document.images);
+      imgs.forEach(function(i){ i.loading = "eager"; });
+      var pending = imgs.filter(function(i){ return !i.complete && i.src; }).map(function(i){
+        return new Promise(function(res){ i.addEventListener("load", res, { once: true }); i.addEventListener("error", res, { once: true }); });
+      });
+      return Promise.race([Promise.all(pending), new Promise(function(res){ setTimeout(res, maxWait); })]);
+    });
+  }
+  var pdfBtn = document.getElementById("pdfBtn");
+  pdfBtn.addEventListener("click", function(){
+    pdfBtn.disabled = true; pdfBtn.querySelector(".lb").textContent = "מכין…";
+    loadAllImages(4000).then(function(){
+      pdfBtn.disabled = false; pdfBtn.querySelector(".lb").textContent = "PDF";
+      toast("בחלון ההדפסה בחרו \"שמירה כ־PDF\"");
+      setTimeout(function(){ window.print(); }, 300);
+    });
+  });
+})();
+
+/* ---------- flight check against the Ben Gurion flight board (data.gov.il, Israel Airports Authority) ---------- */
+(function(){
+  function el(f, sel){ return document.querySelector("#" + f.id + " " + sel); }
+  function setSt(f, cls, txt){ var s = el(f, "[data-st]"); s.className = "flt-st " + (cls || ""); s.textContent = txt; }
+  function vals(r){ return Object.keys(r).map(function(k){ return String(r[k] == null ? "" : r[k]).trim(); }); }
+  function dt(r){ return vals(r).filter(function(v){ return /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(v); }); }
+  function daysTo(d){ return Math.ceil((new Date(d + "T00:00:00+02:00") - new Date()) / 86400000); }
+  TRIP_FLIGHTS.forEach(function(f){
+    var code = f.airline + f.no;
+    el(f, "[data-fno]").textContent = "✈️ " + code;
+    var url = "https://data.gov.il/api/3/action/datastore_search?resource_id=e83f763b-b7d7-479e-b172-ae981ddc6de5&limit=50&q=" + encodeURIComponent(f.airline + " " + f.no);
+    fetch(url).then(function(r){ if (!r.ok) throw 0; return r.json(); }).then(function(j){
+      var recs = (j.result && j.result.records) || [];
+      var mine = recs.filter(function(r){ var v = vals(r); return v.indexOf(f.airline) >= 0 && (v.indexOf(f.no) >= 0 || v.indexOf(code) >= 0 || v.indexOf(f.airline + " " + f.no) >= 0); });
+      var onDay = mine.filter(function(r){ return dt(r).some(function(x){ return x.slice(0, 10) === f.date; }); })[0];
+      if (!onDay){
+        var n = daysTo(f.date);
+        if (mine.length) setSt(f, "ok", "✅ הטיסה פעילה בלוח נתב״ג · התאריך שלנו יופיע כמה ימים לפני");
+        else setSt(f, "", n > 0 ? "📅 יופיע בלוח נתב״ג כמה ימים לפני הטיסה" : "לא נמצא בלוח");
+        return;
+      }
+      var times = dt(onDay), sched = times[0] || "", upd = times[1] || sched;
+      var hhS = sched.slice(11, 16), hhU = upd.slice(11, 16);
+      var status = onDay.CHRMINH || onDay.CHRMINE || "";
+      if (/בוטל|CANCEL/i.test(status)) setSt(f, "bad", "❌ " + status);
+      else if (hhS && f.tlvTime && hhS !== f.tlvTime) setSt(f, "warn", "⚠️ " + f.label + " " + hhS + " (במקום " + f.tlvTime + ")");
+      else if (hhU && hhU !== hhS) setSt(f, "warn", "⏱️ " + f.label + " מעודכנת ל־" + hhU + (status ? " · " + status : ""));
+      else setSt(f, "ok", "✅ " + f.label + " בלוח נתב״ג: " + hhS + (status ? " · " + status : ""));
+    }).catch(function(){ setSt(f, "", "📅 בדיקה מול נתב״ג לא זמינה כרגע"); });
+  });
+})();
+
+/* ---------- back to top ---------- */
+(function(){
+  var btn = document.getElementById("toTop");
+  function upd(){ btn.classList.toggle("show", window.scrollY > 600); }
+  window.addEventListener("scroll", upd, { passive: true });
+  btn.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
+  upd();
+})();
+
+/* ---------- hero: number of sights on the route (timeline items marked key or xmas, minus flights / hotel) ---------- */
+(function(){
+  var n = Array.prototype.filter.call(document.querySelectorAll(".day .timeline li.key, .day .timeline li.xmas"), function(li){ return !/🛬|🛫|🛏/.test(li.textContent); }).length;
+  document.getElementById("statAttr").textContent = n;
+})();
+
+/* ---------- sticky nav: scroll-spy ---------- */
+(function(){
+  var nav = document.getElementById("daynav"), wrap = nav.querySelector(".wrap");
+  var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  var current = null;
+  function setActive(idx){
+    if (idx === current) return;
+    current = idx;
+    links.forEach(function(a,i){ a.classList.toggle("active", i === idx); });
+    var a = links[idx];
+    if (a) wrap.scrollTo({ left: a.offsetLeft - (wrap.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+  }
+  function onScroll(){
+    var line = nav.getBoundingClientRect().bottom + window.innerHeight * 0.25, idx = -1;
+    targets.forEach(function(t,i){ if (t && t.getBoundingClientRect().top <= line) idx = i; });
+    if (idx === -1){ links.forEach(function(a){ a.classList.remove("active"); }); current = null; }
+    else setActive(idx);
+    nav.classList.toggle("stuck", nav.getBoundingClientRect().top <= 0);
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function(){ if (!ticking){ ticking = true; requestAnimationFrame(function(){ ticking = false; onScroll(); }); } }, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+})();
+
+/* ---------- costs ---------- */
+(function(){
+  // entry per person in EUR
+  var ATTR = {
+    vatican:  { name: "מוזיאוני הוותיקן והקפלה הסיסטינית (כולל הזמנה)", p: 25 },
+    pantheon: { name: "הפנתיאון", p: 7 },
+    colos:    { name: "הקולוסיאום, הפורום והפלטינו", p: 18 },
+    borghese: { name: "גלריה בורגזה (כולל הזמנה)", p: 18 }
+  };
+  // meals per person at the "regular" level
+  var MEAL = { light: 15, rest: 40, snack: 8 };
+  var DAYS = {
+    1: { lat: 41.9009, lon: 12.4833, place: "טרווי", walk: 1.5, transport: 55, tName: "מונית מהשדה", attr: [], meals: ["rest"], wx: "🌤️ 14°/5°" },
+    2: { lat: 41.9022, lon: 12.4539, place: "הוותיקן", walk: 10, transport: 3, perPerson: true, tName: "2 נסיעות במטרו", attr: ["vatican","pantheon"], meals: ["light","rest","snack"], wx: "🌤️ 14°/5°" },
+    3: { lat: 41.8902, lon: 12.4922, place: "הקולוסיאום", walk: 12, transport: 3, perPerson: true, tName: "2 נסיעות באוטובוס, אם צריך", attr: ["colos"], meals: ["light","rest","snack"], wx: "🌤️ 14°/5°" },
+    4: { lat: 41.9142, lon: 12.4922, place: "בורגזה", walk: 7, transport: "shuttle", tName: "הסעה לשדה", attr: ["borghese"], meals: ["light","snack"], wx: "🌤️ 14°/5°" }
+  };
+  var CITY_TAX = 7.5, NIGHTS = 3;
+  var SUN_DATES = { 1: "2026-12-20", 2: "2026-12-21", 3: "2026-12-22", 4: "2026-12-23" };
+
+  function $(id){ return document.getElementById(id); }
+  function num(id, d){ var v = parseFloat($(id).value); return isNaN(v) || v < 0 ? d : v; }
+  function ils(n){ return "₪" + Math.round(n).toLocaleString("he-IL"); }
+  function eur(n){ return "€" + (Math.round(n * 10) / 10).toLocaleString("he-IL"); }
+
+  /* sunrise / sunset (NOAA formula, computed locally) */
+  function sunTimes(dateStr, lat, lon){
+    var rad = Math.PI / 180, p = dateStr.split("-");
+    var noonUTC = Date.UTC(+p[0], +p[1] - 1, +p[2], 12);
+    var n = noonUTC / 86400000 + 2440587.5 - 2451545.0 + 0.0008;
+    var J = n - lon / 360;
+    var M = (357.5291 + 0.98560028 * J) % 360;
+    var C = 1.9148 * Math.sin(M*rad) + 0.02 * Math.sin(2*M*rad) + 0.0003 * Math.sin(3*M*rad);
+    var L = (M + C + 180 + 102.9372) % 360;
+    var Jt = 2451545.0 + J + 0.0053 * Math.sin(M*rad) - 0.0069 * Math.sin(2*L*rad);
+    var dec = Math.asin(Math.sin(L*rad) * Math.sin(23.4397*rad));
+    var cosw = (Math.sin(-0.833*rad) - Math.sin(lat*rad) * Math.sin(dec)) / (Math.cos(lat*rad) * Math.cos(dec));
+    var w = Math.acos(cosw) / rad;
+    var toDate = function(jd){ return new Date((jd - 2440587.5) * 86400000); };
+    return { rise: toDate(Jt - w / 360), set: toDate(Jt + w / 360) };
+  }
+  function hm(dt){ return dt.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Rome" }); }
+  function sunLine(d, day){
+    var t = sunTimes(SUN_DATES[d], day.lat, day.lon), now = new Date(), extra = "";
+    var mins = Math.round((t.set - t.rise) / 60000);
+    if (now >= t.rise - 6*3600000 && now < t.set){
+      var left = now < t.rise ? t.rise - now : t.set - now, h = Math.floor(left / 3600000), m = Math.round(left % 3600000 / 60000);
+      extra = ' · <em>' + (now < t.rise ? 'זריחה' : 'שקיעה') + ' בעוד ' + (h ? h + ' ש׳ ' : '') + m + ' דק׳</em>';
+    }
+    return '<span class="sun" title="אור יום: ' + Math.floor(mins/60) + ' ש׳ ' + (mins%60) + ' דק׳">🌅 <bdi dir="ltr">' + hm(t.rise) + '</bdi> · 🌇 <bdi dir="ltr">' + hm(t.set) + '</bdi>' + extra + '</span>';
+  }
+
+  function calc(){
+    var ppl = Math.max(1, num("inPeople", 2)), rate = num("inRate", 3.8), mealK = parseFloat($("inMeals").value) || 1;
+    var shuttle = num("inShuttle", 60), flights = num("inFlights", 0), hotel = num("inHotel", 0);
+    var tot = { attr: 0, trans: 0, meals: 0, walk: 0 }, attrLines = [], transLines = [];
+    Object.keys(DAYS).forEach(function(d){
+      var day = DAYS[d];
+      var at = day.attr.reduce(function(s, k){ var c = ATTR[k].p * ppl; attrLines.push([ATTR[k].name, c]); return s + c; }, 0);
+      var tr = day.transport === "shuttle" ? shuttle : (day.perPerson ? day.transport * ppl : day.transport);
+      transLines.push([day.tName, tr]);
+      var meals = day.meals.reduce(function(s, m){ return s + MEAL[m] * mealK * ppl; }, 0);
+      tot.attr += at; tot.trans += tr; tot.meals += meals; tot.walk += day.walk;
+      var el = document.querySelector('.daysum[data-day="' + d + '"]');
+      if (el){
+        var dayEur = at + tr + meals, e = function(x){ return ' title="' + eur(x) + '"'; };
+        el.innerHTML =
+          '<span class="it">🚶 <b>~' + day.walk + '</b> ק״מ · <b>~' + (Math.round(day.walk * 1.35) ).toLocaleString("he-IL") + ' אלף</b> צעדים</span>' +
+          '<span class="it"' + e(at) + '>🎟️ <b>' + ils(at * rate) + '</b></span>' +
+          '<span class="it"' + e(tr) + '>🚇 <b>' + ils(tr * rate) + '</b></span>' +
+          '<span class="it"' + e(meals) + '>🍽️ <b>' + ils(meals * rate) + '</b></span>' +
+          '<span class="tot">סה״כ ' + ils(dayEur * rate) + '<small>' + eur(dayEur) + '</small></span>';
+        var head = document.querySelector('#day' + d + ' .day-head');
+        if (head){
+          var wb = head.querySelector('.wx-badge');
+          if (!wb){ wb = document.createElement('div'); wb.className = 'wx-badge'; head.appendChild(wb); }
+          var parts = day.wx.split(' '), ic = parts.shift();
+          wb.innerHTML = '<span class="i">' + ic + '</span><span><b><bdi dir="ltr">' + parts.join(' ') + '</bdi></b><small>' + (day.fc ? 'תחזית' : 'ממוצע היסטורי') + ' · ' + day.place + '</small>' + sunLine(d, day) + '</span>';
+        }
+      }
+    });
+    var tax = CITY_TAX * NIGHTS * ppl;
+    var fieldEur = tot.attr + tot.trans + tot.meals + tax, fieldIls = fieldEur * rate;
+    var fixedIls = flights + hotel * rate, grand = fixedIls + fieldIls;
+
+    var h = '<tr class="group"><td colspan="2">הוצאות קבועות</td></tr>';
+    h += '<tr><td>✈️ טיסות ישראייר 6H347 / 6H350</td><td class="n">' + (flights ? ils(flights) : '<small>להשלים</small>') + '</td></tr>';
+    h += '<tr><td>🏨 <bdi>White Hotel</bdi> (3 לילות)</td><td class="n">' + (hotel ? ils(hotel * rate) + ' <small>' + eur(hotel) + '</small>' : '<small>להשלים</small>') + '</td></tr>';
+    h += '<tr class="group"><td colspan="2">הוצאות בשטח (משוער)</td></tr>';
+    h += '<tr><td>🎟️ כניסה לאתרים</td><td class="n">' + ils(tot.attr * rate) + ' <small>' + eur(tot.attr) + '</small></td></tr>';
+    attrLines.forEach(function(l){ h += '<tr class="sub"><td>' + l[0] + '</td><td class="n">' + ils(l[1] * rate) + '</td></tr>'; });
+    h += '<tr><td>🚇 תחבורה</td><td class="n">' + ils(tot.trans * rate) + ' <small>' + eur(tot.trans) + '</small></td></tr>';
+    transLines.forEach(function(l){ h += '<tr class="sub"><td>' + l[0] + '</td><td class="n">' + ils(l[1] * rate) + '</td></tr>'; });
+    h += '<tr><td>🍽️ ארוחות, קפה וגלידה</td><td class="n">' + ils(tot.meals * rate) + ' <small>' + eur(tot.meals) + '</small></td></tr>';
+    h += '<tr><td>🏛️ מס עירוני <small>(€' + CITY_TAX + ' × ' + NIGHTS + ' לילות × ' + ppl + ')</small></td><td class="n">' + ils(tax * rate) + ' <small>' + eur(tax) + '</small></td></tr>';
+    h += '<tr><td><b>סה״כ בשטח</b></td><td class="n"><b>' + ils(fieldIls) + '</b></td></tr>';
+    h += '<tr class="grand"><td>סה״כ לטיול</td><td class="n">' + ils(grand) + '</td></tr>';
+    $("costTable").innerHTML = h;
+
+    $("grandTotal").textContent = ils(grand);
+    $("grandSub").textContent = "כ־" + ils(grand / ppl) + " לאדם" + (fixedIls ? " · קבועות " + ils(fixedIls) + " + בשטח " + ils(fieldIls) : " · בלי טיסות ומלון (להשלים למעלה)");
+    $("statTotal").textContent = ils(fieldIls);
+    $("statKm").textContent = "~" + Math.round(tot.walk);
+  }
+  ["inPeople","inRate","inFlights","inHotel","inShuttle","inMeals"].forEach(function(id){
+    $(id).addEventListener("input", function(){ $(id).dataset.touched = "1"; save(); calc(); });
+  });
+  // remember the numbers the user filled in (flights, hotel, shuttle)
+  function save(){ try { localStorage.setItem("rome.costs", JSON.stringify({ f: $("inFlights").value, h: $("inHotel").value, s: $("inShuttle").value, m: $("inMeals").value })); } catch(e){} }
+  try { var c = JSON.parse(localStorage.getItem("rome.costs")); if (c){ $("inFlights").value = c.f; $("inHotel").value = c.h; $("inShuttle").value = c.s; if (c.m) $("inMeals").value = c.m; } } catch(e){}
+  window.TRIP = { DAYS: DAYS, calc: calc, dates: SUN_DATES };
+  calc();
+  if (new Date() > new Date("2026-12-19T00:00:00+01:00") && new Date() < new Date("2026-12-24T00:00:00+01:00")) setInterval(calc, 60000);
+})();
+
+/* ---------- live data: euro rate, weather + ticker ---------- */
+(function(){
+  var TRIP_START = new Date("2026-12-20T18:50:00+01:00");
+  var state = { done: false, rate: null, rateDate: null, wxNow: null };
+  function $(id){ return document.getElementById(id); }
+  function getJSON(url){ return fetch(url, { cache: "no-store" }).then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  function icon(code){
+    if (code === 0) return "☀️"; if (code <= 2) return "🌤️"; if (code === 3) return "☁️"; if (code <= 48) return "🌫️";
+    if (code <= 57) return "🌦️"; if (code <= 67) return "🌧️"; if (code <= 77) return "🌨️"; if (code <= 82) return "🌧️"; if (code <= 86) return "🌨️"; return "⛈️";
+  }
+  function daysLeft(){ return Math.ceil((TRIP_START - new Date()) / 86400000); }
+  function dmy(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ""); return m ? (+m[3]) + "." + (+m[2]) : ""; }
+  function hhmm(t){ var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  function save(k, v){ try { localStorage.setItem("rome." + k, JSON.stringify({ v: v, t: Date.now() })); } catch(e){} }
+  function load(k){ try { var o = JSON.parse(localStorage.getItem("rome." + k)); return o && o.v != null ? o : null; } catch(e){ return null; } }
+
+  function renderTicker(){
+    var n = daysLeft(), items = [], wait = state.done ? 'לא זמין כרגע' : 'טוען…';
+    if (n > 1) items.push('⏳ עוד <b>' + n.toLocaleString("he-IL") + '</b> ימים לרומא!');
+    else if (n === 1) items.push('⏳ <b>מחר</b> טסים! ✈️');
+    else if (n > -4) items.push('🎉 <b>אנחנו ברומא!</b>');
+    else items.push('🏛️ הטיול הסתיים. Arrivederci, Roma!');
+    if (state.wxNow) items.push(state.wxNow.icon + ' עכשיו ברומא: <b>' + state.wxNow.t + '°</b> · רוח ' + state.wxNow.wind + ' קמ״ש');
+    else items.push('🌤️ מזג אוויר: ' + wait);
+    if (state.rate) items.push('💶 1 € = <b>' + state.rate.toFixed(3) + ' ₪</b>' + (state.rateDate ? ' <small>(שער של ' + dmy(state.rateDate) + ')</small>' : ''));
+    else items.push('💶 שער היורו: ' + wait);
+    items.push('🎟️ להזמין: <b>הקולוסיאום · הוותיקן · בורגזה</b>');
+    items.push('🏨 <b>White Hotel</b> · 3 דק׳ ממזרקת טרווי');
+    items.push('✈️ הלוך · ראשון 20.12 · <b>6H347</b> · נחיתה ברומא 18:50');
+    items.push('✈️ חזור · רביעי 23.12 · <b>6H350</b> · המראה 20:10 · הסעה בסביבות 16:00');
+    if (state.updated) items.push('🔄 עודכן ב־<b>' + hhmm(state.updated) + '</b>');
+    var one = items.map(function(t){ return '<span class="item"><span class="live"></span>' + t + '</span>'; }).join("");
+    $("tickerTrack").innerHTML = one + one;
+  }
+  function note(){
+    $("liveNote").textContent = (state.rate ? (state.rateLive ? "💶 שער יורו לייב: " : "💶 שער יורו (שמור מ־" + new Date(state.rateSaved).toLocaleDateString("he-IL") + "): ") + state.rate.toFixed(3) + " ₪" : "💶 שער היורו לא נטען, משתמשים ב־3.80") + (state.updated ? " · 🔄 עודכן ב־" + hhmm(state.updated) : "");
+  }
+  function getRate(){
+    function src(url, pick){ return getJSON(url).then(function(j){ var r = pick(j); return (r && r.v > 2 && r.v < 8) ? r : null; }).catch(function(){ return null; }); }
+    function unixDate(u){ return u ? new Date(u * 1000).toISOString().slice(0, 10) : ""; }
+    return Promise.all([
+      src("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, d: j.date, s: 1 }; }),
+      src("https://latest.currency-api.pages.dev/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, d: j.date, s: 1 }; }),
+      src("https://open.er-api.com/v6/latest/EUR", function(j){ return { v: j.rates.ILS, d: unixDate(j.time_last_update_unix), s: 2 }; }),
+      src("https://api.frankfurter.app/latest?from=EUR&to=ILS", function(j){ return { v: j.rates.ILS, d: j.date, s: 3 }; })
+    ]).then(function(rs){
+      var best = rs.filter(Boolean).sort(function(a, b){ return (b.d || "").localeCompare(a.d || "") || (a.s - b.s); })[0];
+      if (best){ state.rate = best.v; state.rateDate = best.d; state.rateLive = true; save("rate", { v: best.v, d: best.d }); }
+      else { var c = load("rate"); if (c){ state.rate = c.v.v; state.rateDate = c.v.d; state.rateLive = false; state.rateSaved = c.t; } }
+      var el = $("inRate");
+      if (state.rate && !el.dataset.touched) el.value = state.rate.toFixed(2);
+    });
+  }
+  function getWx(){
+    return getJSON("https://api.open-meteo.com/v1/forecast?latitude=41.9021&longitude=12.4852&current=temperature_2m,weather_code,wind_speed_10m&timezone=Europe%2FRome")
+      .then(function(j){ state.wxNow = { t: Math.round(j.current.temperature_2m), icon: icon(j.current.weather_code), wind: Math.round(j.current.wind_speed_10m) }; })
+      .catch(function(){});
+  }
+  /* forecast for each trip day, once it is within the ~16-day forecast window */
+  function updateForecasts(){
+    var T = window.TRIP; if (!T) return Promise.resolve();
+    return Promise.all(Object.keys(T.DAYS).map(function(d){
+      var day = T.DAYS[d], date = T.dates[d];
+      var ahead = (new Date(date + "T00:00:00+01:00") - new Date()) / 86400000;
+      if (ahead > 15 || ahead < -1) return null;
+      var url = "https://api.open-meteo.com/v1/forecast?latitude=" + day.lat + "&longitude=" + day.lon +
+        "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Europe%2FRome&start_date=" + date + "&end_date=" + date;
+      return getJSON(url).then(function(j){
+        var hi = Math.round(j.daily.temperature_2m_max[0]), lo = Math.round(j.daily.temperature_2m_min[0]);
+        var pr = j.daily.precipitation_probability_max[0], ic = icon(j.daily.weather_code[0]);
+        day.wx = ic + " " + hi + "°/" + lo + "°" + (pr != null ? " · " + pr + "%🌧" : ""); day.fc = true;
+      }).catch(function(){});
+    }));
+  }
+  var lastRefresh = 0, busy = false;
+  function refresh(){
+    if (busy) return; busy = true; state.done = false;
+    var ps = [getRate(), getWx()];
+    ps.forEach(function(p){ p.then(function(){ renderTicker(); if (window.TRIP) window.TRIP.calc(); }); });
+    Promise.all(ps).then(function(){
+      state.done = true; state.updated = Date.now(); lastRefresh = Date.now();
+      renderTicker(); note();
+      return updateForecasts();
+    }).then(function(){ if (window.TRIP) window.TRIP.calc(); busy = false; }, function(){ busy = false; });
+  }
+  renderTicker();
+  refresh();
+  setInterval(refresh, 30 * 60 * 1000);
+  document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible" && Date.now() - lastRefresh > 5 * 60 * 1000) refresh(); });
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ---------- trip map ---------- */
+(function(){
+  var el = document.getElementById("tripMap");
+  if (!window.L){ el.innerHTML = '<div class="map-fallback">לא הצלחנו לטעון את המפה. בדקו את החיבור לאינטרנט ורעננו.</div>'; return; }
+  var COLORS = { 1: "#7a5195", 2: "#2d6fa8", 3: "#b5562f", 4: "#2f8a4f" };
+  var H = HOTEL.ll;
+  var AIRPORT = { n: "שדה התעופה פיומיצ׳ינו (FCO)", d: "נחיתה 20.12 18:50 · המראה 23.12 20:10", ll: [41.8003, 12.2389], day: "day1" };
+  var STOPS = [
+    { n: "מזרקת טרווי", ph: "wiki:Trevi Fountain", e: "⛲", d: 1, ll: [41.9009, 12.4833] },
+    { n: "המדרגות הספרדיות", ph: "wiki:Spanish Steps", e: "🪜", d: 1, ll: [41.9060, 12.4828] },
+    { n: "מוזיאוני הוותיקן", ph: "wiki:Vatican Museums", e: "🎨", d: 2, ll: [41.9065, 12.4536] },
+    { n: "Pizzarium", ph: "wiki:Pizza al taglio", e: "🍕", d: 2, ll: [41.9070, 12.4469] },
+    { n: "בזיליקת פטרוס", ph: "wiki:St. Peter's Basilica", e: "⛪", d: 2, ll: [41.9022, 12.4539] },
+    { n: "טירת סנט׳אנג׳לו", ph: "wiki:Castel Sant'Angelo", e: "🏰", d: 2, ll: [41.9031, 12.4663] },
+    { n: "פיאצה נבונה", ph: "wiki:Piazza Navona", e: "🎠", d: 2, ll: [41.8992, 12.4731] },
+    { n: "הפנתיאון", ph: "wiki:Pantheon, Rome", e: "🏛️", d: 2, ll: [41.8986, 12.4769] },
+    { n: "הקולוסיאום", ph: "wiki:Colosseum", e: "🏛️", d: 3, ll: [41.8902, 12.4922] },
+    { n: "הפורום והפלטינו", ph: "wiki:Roman Forum", e: "🏺", d: 3, ll: [41.8925, 12.4853] },
+    { n: "מונטי", ph: "wiki:Monti (rione of Rome)", e: "🍷", d: 3, ll: [41.8958, 12.4920] },
+    { n: "הקמפידוליו", ph: "wiki:Capitoline Hill", e: "🏛️", d: 3, ll: [41.8934, 12.4828] },
+    { n: "הגטו ובית הכנסת", ph: "wiki:Great Synagogue of Rome", e: "🕍", d: 3, ll: [41.8920, 12.4778] },
+    { n: "טרסטוורה", ph: "wiki:Santa Maria in Trastevere|wiki:Trastevere", e: "🌆", d: 3, ll: [41.8894, 12.4700] },
+    { n: "תצפית הפינצ׳ו", ph: "wiki:Pincian Hill|wiki:Piazza del Popolo", e: "🌅", d: 4, ll: [41.9113, 12.4787] },
+    { n: "גלריה בורגזה", ph: "wiki:Galleria Borghese", e: "🗿", d: 4, ll: [41.9142, 12.4922] },
+    { n: "כיכר הקווירינל", ph: "wiki:Piazza del Quirinale", e: "🏛️", d: 4, ll: [41.8996, 12.4870] }
+  ];
+  // rough walking paths per day (metro legs drawn as a thin line)
+  var PATHS = {
+    1: [H, [41.9009, 12.4833], [41.9035, 12.4845], [41.9060, 12.4828], H],
+    2: [H, [41.9038, 12.4886]],
+    "2m": [[41.9038, 12.4886], [41.9093, 12.4580]],
+    "2b": [[41.9093, 12.4580], [41.9065, 12.4536], [41.9070, 12.4469], [41.9045, 12.4520], [41.9022, 12.4568], [41.9020, 12.4620], [41.9031, 12.4663], [41.9015, 12.4690], [41.8992, 12.4731], [41.8986, 12.4769], [41.9000, 12.4800], H],
+    3: [H, [41.8960, 12.4823], [41.8935, 12.4880], [41.8902, 12.4922], [41.8894, 12.4875], [41.8925, 12.4853], [41.8958, 12.4920], [41.8934, 12.4828], [41.8920, 12.4778], [41.8906, 12.4775], [41.8894, 12.4700], [41.8910, 12.4740], [41.8920, 12.4778], [41.8955, 12.4765], [41.8986, 12.4769], [41.9000, 12.4800], H],
+    4: [H, [41.9060, 12.4828], [41.9113, 12.4787], [41.9130, 12.4850], [41.9142, 12.4922], [41.9080, 12.4890], [41.9061, 12.4800], [41.9015, 12.4800], [41.8996, 12.4870], H]
+  };
+
+  var map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+  var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(map);
+  var tileErrors = 0, switched = false;
+  osm.on("tileerror", function(){
+    if (switched || ++tileErrors < 4) return;
+    switched = true; map.removeLayer(osm);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(map);
+  });
+  function popup(o, day, dLabel){
+    return (o.ph ? lazyImg(o.ph, 400, "pop-img", o.n) : "") + "<b>" + o.n + "</b><span class='pd'>" + dLabel + "</span><br><a href='#" + day + "'>לפרטי היום ←</a>" +
+      "<br><a target='_blank' rel='noopener' href='https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + o.ll[0] + "," + o.ll[1] + "'>🚶 ניווט ברגל</a>";
+  }
+  var DLBL = { 1: "ראשון 20.12", 2: "שני 21.12", 3: "שלישי 22.12", 4: "רביעי 23.12" };
+  var layers = { 1: L.layerGroup(), 2: L.layerGroup(), 3: L.layerGroup(), 4: L.layerGroup() };
+  Object.keys(PATHS).forEach(function(k){
+    var d = parseInt(k, 10), metro = /m$/.test(k);
+    L.polyline(PATHS[k], { color: COLORS[d], weight: metro ? 2 : 4, opacity: .85, dashArray: metro ? "2 6" : "8 8" })
+      .bindTooltip(metro ? "🚇 מטרו A" : "🚶 " + DLBL[d], { sticky: true, className: "mk-tip" }).addTo(layers[d]);
+  });
+  STOPS.forEach(function(o){
+    L.marker(o.ll, { icon: L.divIcon({ className: "", html: '<div class="mk-attr" style="border-color:' + COLORS[o.d] + '">' + o.e + lazyImg(o.ph, 120, "", o.n) + '</div>', iconSize: [40,40], iconAnchor: [20,20], popupAnchor: [0,-18] }) })
+      .bindPopup(popup(o, "day" + o.d, DLBL[o.d]), { maxWidth: 240 }).bindTooltip(o.n, { direction: "top", offset: [0,-18], className: "mk-tip" }).addTo(layers[o.d]);
+  });
+  Object.keys(layers).forEach(function(k){ layers[k].addTo(map); });
+  L.marker(H, { icon: L.divIcon({ className: "", html: '<div class="mk-hotel">🛏️' + lazyImg(HOTEL.ph, 120, "", HOTEL.n) + '</div>', iconSize: [46,46], iconAnchor: [23,23], popupAnchor: [0,-22] }), zIndexOffset: 1000 })
+    .bindPopup(popup({ n: "White Hotel", ph: HOTEL.ph, ll: H }, "overview", "3 לילות · Via in Arcione 77"), { maxWidth: 240 })
+    .bindTooltip("המלון", { permanent: true, direction: "bottom", offset: [0,22], className: "mk-tip" }).addTo(map);
+  var air = L.marker(AIRPORT.ll, { icon: L.divIcon({ className: "", html: '<div class="mk-air">✈️</div>', iconSize: [32,32], iconAnchor: [16,16], popupAnchor: [0,-16] }), zIndexOffset: 900 })
+    .bindPopup("<b>" + AIRPORT.n + "</b><span class='pd'>" + AIRPORT.d + "</span><br><span class='pd'>כ־30 ק״מ מהמלון, 40–60 דק׳ נסיעה</span>").addTo(map);
+
+  var cityBounds = L.latLngBounds(STOPS.map(function(o){ return o.ll; }).concat([H]));
+  map.fitBounds(cityBounds, { padding: [24, 24] });
+  hydrateImgs(el);
+  map.on("popupopen", function(e){ hydrateImgs(e.popup.getElement()); });
+  map.on("click", function(){ map.scrollWheelZoom.enable(); });
+  window.addEventListener("resize", function(){ map.invalidateSize(); });
+
+  var bar = document.getElementById("mapDays");
+  bar.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    bar.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    var d = b.getAttribute("data-d"), pts = [H];
+    Object.keys(layers).forEach(function(k){
+      var on = d === "all" || d === k;
+      if (on){ map.addLayer(layers[k]); STOPS.forEach(function(o){ if (String(o.d) === k) pts.push(o.ll); }); }
+      else map.removeLayer(layers[k]);
+    });
+    map.fitBounds(L.latLngBounds(pts), { padding: [30, 30], maxZoom: 16 });
+  });
+})();
+</script>
+</body>
+</html>
