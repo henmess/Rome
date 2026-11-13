@@ -350,15 +350,12 @@ dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shad
 
 /* ticker */
 .ticker{direction:ltr;overflow:hidden;position:relative;max-width:100%;min-height:34px;border-top:1px solid var(--line);background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;font-size:.88rem;white-space:nowrap}
-.ticker .track{display:flex;flex-wrap:nowrap;width:-webkit-max-content;width:max-content;-webkit-animation:tick 45s linear infinite;animation:tick 45s linear infinite;will-change:transform;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
-@media (hover:hover){.ticker:hover .track{-webkit-animation-play-state:paused;animation-play-state:paused}}
+.ticker .track{display:flex;flex-wrap:nowrap;width:-webkit-max-content;width:max-content}
 .ticker .item{direction:rtl;flex:0 0 auto;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:7px 26px;border-inline-end:1px solid rgba(255,255,255,.25)}
 .ticker .item b{font-variant-numeric:tabular-nums}
 .ticker .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ffe08a;box-shadow:0 0 0 0 rgba(255,224,138,.7);animation:pulse 2s infinite}
-@-webkit-keyframes tick{from{-webkit-transform:translate3d(-50%,0,0);transform:translate3d(-50%,0,0)}to{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}}
-@keyframes tick{from{-webkit-transform:translate3d(-50%,0,0);transform:translate3d(-50%,0,0)}to{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,224,138,.6)}70%{box-shadow:0 0 0 7px rgba(255,224,138,0)}100%{box-shadow:0 0 0 0 rgba(255,224,138,0)}}
-@media (prefers-reduced-motion: reduce){.ticker{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.ticker::-webkit-scrollbar{display:none}.ticker .track{-webkit-animation:none;animation:none}}
+@media (prefers-reduced-motion: reduce){.ticker{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.ticker::-webkit-scrollbar{display:none}}
 .live-note{font-size:.78rem;color:var(--muted);margin-top:8px}
 
 /* ideas catalog */
@@ -1638,6 +1635,7 @@ try { (function(){
     if (state.updated) items.push('🔄 עודכן ב־<b>' + hhmm(state.updated) + '</b>');
     var one = items.map(function(t){ return '<span class="item"><span class="live"></span>' + t + '</span>'; }).join("");
     $("tickerTrack").innerHTML = one + one;
+    if (window.tickerResync) window.tickerResync();
   }
   function note(){
     $("liveNote").textContent = (state.rate ? (state.rateLive ? "💶 שער יורו לייב: " : "💶 שער יורו (שמור מ־" + new Date(state.rateSaved).toLocaleDateString("he-IL") + "): ") + state.rate.toFixed(3) + " ₪" + (state.usd ? " · 💵 דולר: " + state.usd.toFixed(3) + " ₪" : "") : "💶 שער היורו לא נטען, משתמשים ב־3.55") + (state.updated ? " · 🔄 עודכן ב־" + hhmm(state.updated) : "");
@@ -1696,6 +1694,38 @@ try { (function(){
   refresh();
   setInterval(refresh, 30 * 60 * 1000);
   document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible" && Date.now() - lastRefresh > 5 * 60 * 1000) refresh(); });
+})();
+</script>
+<script>
+/* ---------- ticker motion: moves the strip with scrollLeft (smooth in Safari, keeps its place when the text updates) ---------- */
+(function(){
+  var box = document.querySelector(".ticker"), track = document.getElementById("tickerTrack");
+  if (!box || !track) return;
+  var SPEED = 38; // px per second
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var pos = 0, half = 0, last = 0, paused = false;
+  function measure(){ half = track.scrollWidth / 2; if (half > 0){ pos = ((pos % half) + half) % half; if (!pos) pos = half; } }
+  window.tickerResync = function(){ var ratio = half ? pos / half : 1; measure(); pos = half * ratio || half; };
+  measure(); pos = half;
+  if (reduce) return; // with "Reduce Motion" the strip stays still and can be swiped
+  function frame(t){
+    if (!last) last = t;
+    var dt = Math.min(t - last, 100) / 1000; last = t;
+    if (!paused && half > box.clientWidth / 2){
+      pos -= SPEED * dt;            // content moves to the right, like the original
+      if (pos <= 0) pos += half;    // seamless: the second copy is identical
+      box.scrollLeft = pos;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  // pause while touching / hovering, so an item can be read
+  box.addEventListener("touchstart", function(){ paused = true; }, { passive: true });
+  box.addEventListener("touchend", function(){ setTimeout(function(){ paused = false; }, 1200); }, { passive: true });
+  box.addEventListener("mouseenter", function(){ paused = true; });
+  box.addEventListener("mouseleave", function(){ paused = false; });
+  window.addEventListener("resize", window.tickerResync);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(window.tickerResync);
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
