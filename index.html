@@ -349,15 +349,16 @@ dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shad
 .flt-links a{color:#fff}
 
 /* ticker */
-.ticker{direction:ltr;overflow:hidden;contain:paint;max-width:100%;border-top:1px solid var(--line);background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;font-size:.88rem;white-space:nowrap}
-.ticker .track{display:flex;width:max-content;animation:tick 45s linear infinite}
-.ticker:hover .track{animation-play-state:paused}
-.ticker .item{direction:rtl;display:inline-flex;align-items:center;gap:6px;padding:7px 26px;border-inline-end:1px solid rgba(255,255,255,.25)}
+.ticker{direction:ltr;overflow:hidden;position:relative;max-width:100%;min-height:34px;border-top:1px solid var(--line);background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;font-size:.88rem;white-space:nowrap}
+.ticker .track{display:flex;flex-wrap:nowrap;width:-webkit-max-content;width:max-content;-webkit-animation:tick 45s linear infinite;animation:tick 45s linear infinite;will-change:transform;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
+@media (hover:hover){.ticker:hover .track{-webkit-animation-play-state:paused;animation-play-state:paused}}
+.ticker .item{direction:rtl;flex:0 0 auto;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:7px 26px;border-inline-end:1px solid rgba(255,255,255,.25)}
 .ticker .item b{font-variant-numeric:tabular-nums}
 .ticker .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ffe08a;box-shadow:0 0 0 0 rgba(255,224,138,.7);animation:pulse 2s infinite}
-@keyframes tick{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+@-webkit-keyframes tick{from{-webkit-transform:translate3d(-50%,0,0);transform:translate3d(-50%,0,0)}to{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}}
+@keyframes tick{from{-webkit-transform:translate3d(-50%,0,0);transform:translate3d(-50%,0,0)}to{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,224,138,.6)}70%{box-shadow:0 0 0 7px rgba(255,224,138,0)}100%{box-shadow:0 0 0 0 rgba(255,224,138,0)}}
-@media (prefers-reduced-motion: reduce){.ticker .track{animation:none;flex-wrap:wrap;width:auto;justify-content:center}}
+@media (prefers-reduced-motion: reduce){.ticker{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.ticker::-webkit-scrollbar{display:none}.ticker .track{-webkit-animation:none;animation:none}}
 .live-note{font-size:.78rem;color:var(--muted);margin-top:8px}
 
 /* ideas catalog */
@@ -558,7 +559,7 @@ footer a{color:var(--muted)}
     <a href="#sos">🚨 חירום</a>
     <a href="#tips">טיפים</a>
   </div>
-  <div class="ticker" aria-label="עדכונים חיים"><div class="track" id="tickerTrack"></div></div>
+  <div class="ticker" aria-label="עדכונים חיים"><div class="track" id="tickerTrack"><span class="item"><span class="live"></span>✈️ הלוך · ראשון 20.12 · <b>6H347</b> · נחיתה ברומא 18:50</span><span class="item"><span class="live"></span>🎄 <b>שוק חג המולד בנבונה</b> · שני 21.12 בערב</span><span class="item"><span class="live"></span>🎄 <b>Christmas World</b> בווילה בורגזה · שלישי 22.12 בערב</span><span class="item"><span class="live"></span>🎟️ להזמין: <b>הקולוסיאום · הוותיקן</b></span><span class="item"><span class="live"></span>🏨 <b>White Hotel</b> · 3 דק׳ ממזרקת טרווי</span><span class="item"><span class="live"></span>✈️ חזור · רביעי 23.12 · <b>6H350</b> · המראה 20:10 · הסעה מהמלון ב־16:10</span><span class="item"><span class="live"></span>✈️ הלוך · ראשון 20.12 · <b>6H347</b> · נחיתה ברומא 18:50</span><span class="item"><span class="live"></span>🎄 <b>שוק חג המולד בנבונה</b> · שני 21.12 בערב</span><span class="item"><span class="live"></span>🎄 <b>Christmas World</b> בווילה בורגזה · שלישי 22.12 בערב</span><span class="item"><span class="live"></span>🎟️ להזמין: <b>הקולוסיאום · הוותיקן</b></span><span class="item"><span class="live"></span>🏨 <b>White Hotel</b> · 3 דק׳ ממזרקת טרווי</span><span class="item"><span class="live"></span>✈️ חזור · רביעי 23.12 · <b>6H350</b> · המראה 20:10 · הסעה מהמלון ב־16:10</span></div></div>
 </nav>
 
 <div class="actions" role="toolbar" aria-label="כלים">
@@ -1617,7 +1618,8 @@ try { (function(){
   function save(k, v){ try { localStorage.setItem("rome." + k, JSON.stringify({ v: v, t: Date.now() })); } catch(e){} }
   function load(k){ try { var o = JSON.parse(localStorage.getItem("rome." + k)); return o && o.v != null ? o : null; } catch(e){ return null; } }
 
-  function renderTicker(){
+  function renderTicker(){ try { renderTicker0(); } catch(e){ window.TICKER_ERR = String(e && e.message || e); } }
+  function renderTicker0(){
     var n = daysLeft(), items = [], wait = state.done ? 'לא זמין כרגע' : 'טוען…';
     if (n > 1) items.push('⏳ עוד <b>' + n.toLocaleString("he-IL") + '</b> ימים לרומא!');
     else if (n === 1) items.push('⏳ <b>מחר</b> טסים! ✈️');
