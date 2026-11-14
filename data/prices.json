@@ -1,19 +1,47 @@
 {
-  "checked": null,
+  "checked": "2026-11-14T09:55:55+00:00",
   "items": {
     "flights": {
       "name": "✈️ טיסות ישראייר 6H347 / 6H350",
       "cur": "USD",
       "paid": 384,
-      "fare": "הלוך וחזור לשני מבוגרים, 20.12 ת״א ← רומא (6H347) ו־23.12 רומא ← ת״א (6H350)",
-      "history": []
+      "fare": "הלוך וחזור לשני מבוגרים, 20.12 ת״א ← רומא (6H347) ו־23.12 רומא ← ת״א (6H350) · התעריף הזול ביותר (סוג התעריף שלנו לא ידוע)",
+      "history": [
+        {
+          "d": "2026-11-14",
+          "p": 396,
+          "src": "google-flights",
+          "ils": null
+        }
+      ],
+      "quotes": {
+        "israir": null,
+        "google-flights": 396
+      },
+      "link": "https://www.google.com/travel/flights?q=Flights%20from%20TLV%20to%20FCO%20on%202026-12-20%20returning%202026-12-23%20for%202%20adults%20nonstop&curr=USD&hl=en&gl=IL",
+      "note": "אתר ישראייר חסום לבדיקה אוטומטית (Queue-it/Incapsula), המחיר מ־Google Flights. 6H347 מופיעה עם נחיתה ב־18:55 (במקום 18:50) והיא הטיסה היחידה של ישראייר ביום הזה. בכיוון אחד: ‎$198 הלוך + ‎$199 חזור."
     },
     "hotel": {
       "name": "🏨 <bdi>White Hotel</bdi>, רומא (3 לילות)",
       "cur": "EUR",
       "paid": 727,
-      "fare": "חדר זוגי · ארוחת בוקר · ביטול חינם · באתר המלון",
-      "history": []
+      "fare": "חדר טריפל סופיריור לשניים · ארוחת בוקר · ביטול חינם עד 4 ימים לפני · באתר המלון · כולל מס עירוני",
+      "history": [
+        {
+          "d": "2026-11-14",
+          "p": 752,
+          "src": "hotel",
+          "ils": null
+        }
+      ],
+      "quotes": {
+        "hotel": 752,
+        "booking.com": null,
+        "hotels.com": null,
+        "agoda": null
+      },
+      "link": "https://book.blastness.com/results?lingua_int=eng&id_albergo=20709&dc=1596&id_stile=&notti_1=3&tot_camere=1&tot_adulti=2&tot_bambini=0&gg=20&mm=12&aa=2026",
+      "note": "החדרים הזוגיים (סטנדרט/סופיריור) אזלו באתר המלון לתאריכים שלנו; הזול שנשאר עם ארוחת בוקר וביטול חינם הוא Triple Room Superior לשני מבוגרים: €707 + מס עירוני €45 = €752 (ג׳וניור סוויט: €803). Booking.com חסם את הבדיקה, Hotels.com לא נטען, Agoda לא החזיר תוצאות."
     }
   }
 }
