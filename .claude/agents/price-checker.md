@@ -18,7 +18,7 @@ Compare **in the currency we paid** (flights in USD, hotel in EUR) so exchange-r
   Record as the main price the **cheapest price that matches our booking**, and say where it came from.
 - **Flights:** 1) Israir's own site (israir.co.il) for 6H347 + 6H350 on those dates, 2 adults; 2) Google Flights (only those exact flights). Never use other agencies.
 
-If the exact flights, room or conditions are not offered, do NOT add a price to `history` (the page would show a false drop). Set `error` instead (see below).
+If the exact flights, room or conditions are not offered, do NOT add a price to `history` (the page would show a false drop or rise). Put the closest alternative in `items.<id>.other_room` ({d, p, src, room}) and set `error` explaining that no matching room/flight was found today (e.g. "החדרים הזוגיים אזלו באתר המלון"). A triple or a suite is NOT a double room.
 Small differences (room name, bed type) are fine if the room is a double with breakfast and free cancellation; explain in `note`.
 Check whether the price includes the city tax (our €727 does). If a site excludes it, add it (Rome 4-star: about €7.50 per person per night = €45 for us) and say so in `note`.
 

@@ -1862,7 +1862,11 @@ try { (function(){
       var q = it.quotes ? Object.keys(it.quotes).filter(function(k){ return it.quotes[k] != null; }).map(function(k){ return k + ' ' + money(it.quotes[k], cur); }).join(' · ') : '';
       var nm = '<div class="nm">' + it.name + '<small>שילמנו ' + money(it.paid, cur) + (last ? ' · נבדק ב־' + dm(last.d) + (last.src ? ' ב־' + last.src : '') : '') +
         (it.fare ? ' · ' + it.fare : '') + (q ? '<br>מחירים היום: ' + q : '') + (it.error ? '<br>⚠️ ' + it.error : '') + link + '</small></div>';
-      if (!last){ rows += '<div class="pt-row">' + nm + '<div class="now same">—<small>עוד אין בדיקה</small></div></div>'; return; }
+      if (!last){
+        var o = it.other_room;
+        rows += '<div class="pt-row">' + nm + '<div class="now same">—<small>' + (o ? 'חדר אחר (' + dm(o.d) + '): ' + money(o.p, cur) + '<br>' + o.room : 'עוד אין בדיקה') + '</small></div></div>';
+        return;
+      }
       rows += '<div class="pt-row">' + nm + spark(h, it.paid) +
         '<div class="now">' + money(last.p, cur) + '<small>' + (prev ? 'מהבדיקה הקודמת: ' + diff(last.p, prev.p, cur) + '<br>' : '') + 'מול מה ששילמנו: ' + diff(last.p, it.paid, cur) + '</small></div></div>';
       if (last.p < it.paid - 0.5){
