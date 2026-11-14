@@ -15,3 +15,4 @@ The site is a single-page Hebrew RTL `index.html`, built in the style of the Bla
 - After any itinerary change, update all places that mention it: the day timeline, `DAYS` in the costs script, `STOPS`/`PATHS` in the map script, the overview cards, the booking checklist, the ticker and the short summary (`#summary`, no dates/times/meals).
 - **Any itinerary change** (times, order, days, restaurants): run the `route-checker` agent (`.claude/agents/route-checker.md`), then fix 🔴 findings.
 - Check JS syntax and load the page with Playwright (390px + desktop): no JS errors and no horizontal overflow.
+- **Price tracking:** the `price-checker` agent (`.claude/agents/price-checker.md`) checks the flights (USD) and the hotel (EUR, hotel site first) daily from a scheduled task and appends to `data/prices.json`; the page shows it in `#prices`. Commit only `data/prices.json` when running it.

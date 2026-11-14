@@ -392,6 +392,19 @@ dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shad
 .cam-cap b{display:block;font-size:.88rem}
 .cam-cap small{color:var(--muted);font-size:.74rem}
 
+/* price tracker */
+.pt-list{display:grid;gap:8px}
+.pt-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.pt-row .nm{font-weight:600;font-size:.92rem;min-width:0;overflow-wrap:anywhere}
+.pt-row .nm small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
+.pt-row .now{font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:left}
+.pt-row .now small{display:block;font-weight:500;font-size:.74rem;text-align:left}
+.pt-row .up{color:#c0392b}.pt-row .down{color:#1e8449}.pt-row .same{color:var(--muted)}
+.pt-row svg{display:block;width:84px;height:28px}
+.pt-row a{font-size:.78rem;color:var(--brand);text-decoration:none;white-space:nowrap}
+.pt-alert{margin-bottom:10px;background:color-mix(in srgb,#1e8449 14%,var(--surface));border:1px solid color-mix(in srgb,#1e8449 40%,transparent);border-radius:12px;padding:10px 12px;font-size:.9rem}
+@media (max-width:480px){.pt-row{grid-template-columns:minmax(0,1fr) auto}.pt-row .nm{grid-column:1/-1}.pt-row svg{width:100%;max-width:140px}}
+@media print{#prices{display:none}}
 /* costs */
 .cost-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
 .panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
@@ -556,6 +569,7 @@ footer a{color:var(--muted)}
     <a href="#ideas">🎄 עוד רעיונות</a>
     <a href="#book">🎟️ להזמין</a>
     <a href="#cams">📷 מצלמות</a>
+    <a href="#prices">📉 מחירים</a>
     <a href="#costs">💰 עלויות</a>
     <a href="#sos">🚨 חירום</a>
     <a href="#tips">טיפים</a>
@@ -973,6 +987,16 @@ footer a{color:var(--muted)}
       <div class="live-note" id="liveNote">⏳ טוען שער יורו ודולר עדכניים…</div>
       <div class="big-total"><span>סה״כ לטיול (משוער)</span><b id="grandTotal">—</b><span id="grandSub"></span></div>
     </div>
+  </div>
+</section>
+
+<!-- ================= PRICE TRACKER ================= -->
+<section id="prices">
+  <h2 class="sec">📉 מעקב מחירים</h2>
+  <p class="sec-sub" id="ptSub">⏳ טוען…</p>
+  <div class="panel">
+    <div id="ptAlert"></div>
+    <div class="pt-list" id="ptList"></div>
   </div>
 </section>
 
@@ -1705,6 +1729,7 @@ try { (function(){
     items.push('🎟️ להזמין: <b>הקולוסיאום · הוותיקן · Christmas Garden</b>');
     items.push('✨ <b>מופע האור בגן הבוטני ושוק נבונה</b> · שני 21.12 בערב');
     items.push('🎄 <b>Christmas World</b> בווילה בורגזה · שלישי 22.12 מ־16:20');
+    (window.PRICE_DROPS || []).forEach(function(t){ items.push(t); });
     items.push('🏨 <b>White Hotel</b> · 3 דק׳ ממזרקת טרווי');
     items.push('✈️ הלוך · ראשון 20.12 · <b>6H347</b> · נחיתה ברומא 18:50');
     items.push('✈️ חזור · רביעי 23.12 · <b>6H350</b> · המראה 20:10 · הסעה מהמלון ב־16:10');
@@ -1766,6 +1791,7 @@ try { (function(){
       return updateForecasts();
     }).then(function(){ if (window.TRIP) window.TRIP.calc(); busy = false; }, function(){ busy = false; });
   }
+  window.TRIP_TICKER = renderTicker;
   renderTicker();
   refresh();
   setInterval(refresh, 30 * 60 * 1000);
@@ -1802,6 +1828,60 @@ try { (function(){
   box.addEventListener("mouseleave", function(){ paused = false; });
   window.addEventListener("resize", window.tickerResync);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(window.tickerResync);
+})();
+</script>
+<script>
+/* ---------- price tracker: data/prices.json is refreshed daily by the price-checker agent ---------- */
+(function(){
+  var list = document.getElementById("ptList"), sub = document.getElementById("ptSub"), alertBox = document.getElementById("ptAlert");
+  if (!list) return;
+  var ORDER = ["flights", "hotel"];
+  var SYM = { USD: "$", EUR: "€", ILS: "₪" };
+  function money(n, cur){ return (SYM[cur] || "") + Math.round(n).toLocaleString("he-IL"); }
+  function dm(d){ var p = d.split("-"); return +p[2] + "." + +p[1]; }
+  function diff(a, b, cur){
+    var x = a - b, pc = b ? Math.round(Math.abs(x) / b * 100) : 0;
+    if (Math.abs(x) < 1) return '<span class="same">ללא שינוי</span>';
+    return '<span class="' + (x > 0 ? 'up' : 'down') + '">' + (x > 0 ? '▲ ' : '▼ ') + money(Math.abs(x), cur) + ' (' + pc + '%)</span>';
+  }
+  function spark(h, paid){
+    if (h.length < 2) return '';
+    var vals = h.map(function(e){ return e.p; }).concat([paid]), mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), rg = mx - mn || 1;
+    var X = function(i){ return 2 + i * 80 / (h.length - 1); }, Y = function(v){ return 25 - (v - mn) / rg * 22; };
+    var pts = h.map(function(e, i){ return X(i).toFixed(1) + "," + Y(e.p).toFixed(1); }).join(" ");
+    var last = h[h.length - 1].p, col = last > paid ? "#c0392b" : last < paid ? "#1e8449" : "#888";
+    return '<svg viewBox="0 0 84 28" aria-hidden="true"><line x1="0" x2="84" y1="' + Y(paid).toFixed(1) + '" y2="' + Y(paid).toFixed(1) + '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/>' +
+      '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+  function render(data){
+    var items = (data && data.items) || {}, rows = "", drops = [], alerts = [];
+    ORDER.forEach(function(id){
+      var it = items[id]; if (!it) return;
+      var cur = it.cur || "EUR", h = it.history || [], last = h[h.length - 1], prev = h[h.length - 2];
+      var link = it.link ? ' <a href="' + String(it.link).replace(/"/g, "&quot;") + '" target="_blank" rel="noopener">בדוק ↗</a>' : '';
+      var q = it.quotes ? Object.keys(it.quotes).filter(function(k){ return it.quotes[k] != null; }).map(function(k){ return k + ' ' + money(it.quotes[k], cur); }).join(' · ') : '';
+      var nm = '<div class="nm">' + it.name + '<small>שילמנו ' + money(it.paid, cur) + (last ? ' · נבדק ב־' + dm(last.d) + (last.src ? ' ב־' + last.src : '') : '') +
+        (it.fare ? ' · ' + it.fare : '') + (q ? '<br>מחירים היום: ' + q : '') + (it.error ? '<br>⚠️ ' + it.error : '') + link + '</small></div>';
+      if (!last){ rows += '<div class="pt-row">' + nm + '<div class="now same">—<small>עוד אין בדיקה</small></div></div>'; return; }
+      rows += '<div class="pt-row">' + nm + spark(h, it.paid) +
+        '<div class="now">' + money(last.p, cur) + '<small>' + (prev ? 'מהבדיקה הקודמת: ' + diff(last.p, prev.p, cur) + '<br>' : '') + 'מול מה ששילמנו: ' + diff(last.p, it.paid, cur) + '</small></div></div>';
+      if (last.p < it.paid - 0.5){
+        drops.push('📉 ' + it.name.replace(/\s*\(.*\)$/, '') + ': <b>' + money(last.p, cur) + '</b> · זול ב־' + money(it.paid - last.p, cur));
+        if (id === "hotel" && (it.paid - last.p >= 25 || (it.paid - last.p) / it.paid >= 0.03)) alerts.push('💰 המלון זול היום ב־' + money(it.paid - last.p, cur) + ' ממה ששילמנו. ההזמנה עם ביטול חינם, אז כדאי לבדוק הזמנה מחדש.');
+      }
+    });
+    list.innerHTML = rows;
+    alertBox.innerHTML = alerts.length ? '<div class="pt-alert">' + alerts.join('<br>') + '</div>' : '';
+    sub.textContent = data && data.checked
+      ? "סוכן בודק כל יום את מחיר הטיסות (ישראייר ו־Google Flights) ואת מחיר המלון (באתר המלון, ולהשוואה גם ב־Booking.com, ב־Hotels.com ובאגודה), לאותן טיסות ולאותו חדר עם ארוחת בוקר וביטול חינם. ההשוואה במטבע ששילמנו בו. בדיקה אחרונה: " + new Date(data.checked).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) + ". ▼ ירוק = זול יותר, ▲ אדום = יקר יותר."
+      : "הבדיקה היומית עוד לא רצה.";
+    window.PRICE_DROPS = drops;
+    if (drops.length && window.TRIP_TICKER) window.TRIP_TICKER();
+  }
+  fetch("data/prices.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+    .then(render)
+    .catch(function(){ sub.textContent = "לא הצלחנו לטעון את נתוני המחירים."; });
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
