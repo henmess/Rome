@@ -430,6 +430,9 @@ a.tel:hover{border-color:#c2412d}
 .tipcard .ico{font-size:1.6rem}
 .tipcard h3{margin:6px 0 4px;font-size:1.05rem}
 .tipcard p{margin:0;color:var(--muted);font-size:.93rem}
+.summary-box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;border-inline-start:6px solid var(--brand)}
+.summary-text{white-space:pre-wrap;margin:0;font:inherit;font-size:.95rem;line-height:1.75;color:var(--ink)}
+.summary-box .tool-btns{margin:14px 0 0}
 .checklist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .checklist label{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:.93rem}
 .checklist input{margin-top:5px;accent-color:var(--brand);width:18px;height:18px;flex:0 0 auto}
@@ -544,6 +547,7 @@ footer a{color:var(--muted)}
 <nav class="days" id="daynav" aria-label="ניווט בין הימים">
   <div class="wrap">
     <a href="#overview">סקירה</a>
+    <a href="#summary">📝 בקצרה</a>
     <a href="#day1">ראשון <small>20.12</small></a>
     <a href="#day2">שני <small>21.12</small></a>
     <a href="#day3">שלישי <small>22.12</small></a>
@@ -661,6 +665,45 @@ footer a{color:var(--muted)}
       <div class="ph" data-img="wiki:Spanish Steps" data-fallback="🪜"></div>
       <div class="body"><span class="nights">רביעי · 23.12</span><h3>הפנתיאון ועצי חג המולד</h3><p>הפנתיאון בבוקר, העץ בפיאצה דל פופולו, תצפית הפינצ׳ו, ירידה במדרגות הספרדיות אל העץ, צהריים, מנוחה במלון, וב־16:10 הסעה לשדה.</p></div>
     </a>
+  </div>
+</section>
+
+<!-- ================= SHORT SUMMARY ================= -->
+<section id="summary">
+  <h2 class="sec">📝 המסלול בקצרה</h2>
+  <p class="sec-sub">גרסה קצרה של המסלול, בלי תאריכים, שעות וארוחות. לוחצים "העתק" ומדביקים בוואטסאפ או במייל.</p>
+  <div class="summary-box">
+    <p class="summary-text" id="summaryText">טיול לרומא – 4 ימים, זוג, ברגל ובתחבורה ציבורית, מלון ליד מזרקת טרווי
+
+יום 1 – הגעה
+• נחיתה בערב והסעה למלון
+• מזרקת טרווי בלילה
+• סיבוב באורות חג המולד עד המדרגות הספרדיות
+
+יום 2 – הוותיקן וערב חג המולד
+• מוזיאוני הוותיקן והקפלה הסיסטינית
+• כיכר פטרוס: עץ חג המולד ותערוכת 100 Presepi
+• בזיליקת פטרוס, ביקור קצר
+• מנוחה במלון
+• ערב: Christmas Garden בגן הבוטני ושוק חג המולד בפיאצה נבונה
+
+יום 3 – הקולוסיאום, הגטו וכריסמס וורלד
+• הקולוסיאום ומעבר קצר בפורום
+• הקפיטול וכנסיית Aracoeli
+• הגטו והרובע היהודי
+• מנוחה במלון
+• אחר הצהריים והערב: Christmas World בווילה בורגזה
+
+יום 4 – בוקר אחרון וטיסה
+• הפנתיאון
+• פיאצה דל פופולו ותצפית הפינצ׳ו
+• המדרגות הספרדיות
+• מנוחה במלון וארגון
+• הסעה לשדה התעופה וטיסה</p>
+    <div class="tool-btns">
+      <button class="act-btn primary" id="copySummary" type="button">📋 העתק</button>
+      <a class="act-btn" id="waSummary" target="_blank" rel="noopener" href="#">💬 שלח בוואטסאפ</a>
+    </div>
   </div>
 </section>
 
@@ -1339,6 +1382,30 @@ document.querySelectorAll("dialog.menu-dlg, dialog.tool-dlg").forEach(function(d
   d.querySelector(".dlg-x").addEventListener("click", function(){ d.close(); });
   d.addEventListener("click", function(e){ if (e.target === d) d.close(); });
 });
+
+/* ---------- copy the short summary ---------- */
+(function(){
+  var btn = document.getElementById("copySummary"), box = document.getElementById("summaryText"), wa = document.getElementById("waSummary");
+  if (!btn || !box) return;
+  var text = box.textContent;
+  wa.href = "https://wa.me/?text=" + encodeURIComponent(text);
+  function done(ok){
+    btn.textContent = ok ? "✅ הועתק" : "⚠️ סמנו והעתיקו ידנית";
+    setTimeout(function(){ btn.textContent = "📋 העתק"; }, 2200);
+  }
+  function fallback(){
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px";
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+      var ok = document.execCommand("copy"); document.body.removeChild(ta); done(ok);
+    } catch(e){ done(false); }
+  }
+  btn.addEventListener("click", function(){
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ done(true); }, fallback);
+    else fallback();
+  });
+})();
 
 /* ---------- share & PDF ---------- */
 (function(){

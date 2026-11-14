@@ -12,6 +12,6 @@ The site is a single-page Hebrew RTL `index.html`, built in the style of the Bla
 - Meals: lunch and dinner always in the area where we already are at that time (on the route), never a walk to a restaurant elsewhere. Plan one hour per meal, no more.
 - Daily rhythm: leave the hotel at 09:00, back around 17:00 to rest, then out in the evening for dinner and a Christmas-lights walk.
 - Preference: Christmas markets and Christmas atmosphere over ancient sites (keep only the famous ones: Colosseum, Pantheon, Trevi, St Peter's/Sistine Chapel).
-- After any itinerary change, update all places that mention it: the day timeline, `DAYS` in the costs script, `STOPS`/`PATHS` in the map script, the overview cards, the booking checklist and the ticker.
+- After any itinerary change, update all places that mention it: the day timeline, `DAYS` in the costs script, `STOPS`/`PATHS` in the map script, the overview cards, the booking checklist, the ticker and the short summary (`#summary`, no dates/times/meals).
 - **Any itinerary change** (times, order, days, restaurants): run the `route-checker` agent (`.claude/agents/route-checker.md`), then fix 🔴 findings.
 - Check JS syntax and load the page with Playwright (390px + desktop): no JS errors and no horizontal overflow.
