@@ -663,7 +663,7 @@ footer a{color:var(--muted)}
         <li>⛲ מזרקת טרווי: 3 דק׳ הליכה · 🪜 המדרגות הספרדיות: 8 דק׳ · 🏛️ הפנתיאון: 12 דק׳</li>
         <li>🚇 מטרו A, תחנת Barberini: 8 דק׳ · הקולוסיאום: 25 דק׳ ברגל · הוותיקן: 40 דק׳ ברגל, או 15 דק׳ במטרו</li>
         <li>🕓 צ׳ק־אאוט מאוחר עד 16:00 ביום האחרון. ההסעה לשדה (Marco Piperno) אוספת מהמלון ב־16:10 <button class="menu-btn" type="button" data-menu="transfer-dlg">🚐 פרטי ההסעה</button></li>
-        <li>💶 המחיר (€727) כולל ארוחת בוקר, ביטול חינם ומס עירוני, אז אין עוד תשלום במלון</li>
+        <li>💶 המחיר (€727) כולל ארוחת בוקר, ביטול חינם, מס עירוני וצ׳ק־אאוט מאוחר עד 16:00 (€50 מתוך הסכום), אז אין עוד תשלום במלון</li>
       </ul>
       <div class="tool-btns" style="margin-bottom:0">
         <a class="act-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Hotel+White+Via+in+Arcione+77+Roma">📍 במפה</a>
@@ -1678,7 +1678,7 @@ try { (function(){
 
     var h = '<tr class="group"><td colspan="2">הוצאות קבועות</td></tr>';
     h += '<tr><td>✈️ טיסות ישראייר 6H347 / 6H350</td><td class="n">' + (flights ? ils(flights) + ' <small>$' + flightsUsd.toLocaleString("he-IL") + '</small>' : '<small>להשלים</small>') + '</td></tr>';
-    h += '<tr><td>🏨 <bdi>White Hotel</bdi> (3 לילות, ארוחת בוקר, ביטול חינם ומס עירוני)</td><td class="n">' + (hotel ? ils(hotel * rate) + ' <small>' + eur(hotel) + '</small>' : '<small>להשלים</small>') + '</td></tr>';
+    h += '<tr><td>🏨 <bdi>White Hotel</bdi> (3 לילות, ארוחת בוקר, ביטול חינם, מס עירוני וצ׳ק־אאוט מאוחר)</td><td class="n">' + (hotel ? ils(hotel * rate) + ' <small>' + eur(hotel) + '</small>' : '<small>להשלים</small>') + '</td></tr>';
     h += '<tr class="group"><td colspan="2">הוצאות בשטח (משוער)</td></tr>';
     h += '<tr><td>🎟️ כניסה לאתרים</td><td class="n">' + ils(tot.attr * rate) + ' <small>' + eur(tot.attr) + '</small></td></tr>';
     attrLines.forEach(function(l){ h += '<tr class="sub"><td>' + l[0] + '</td><td class="n">' + ils(l[1] * rate) + '</td></tr>'; });
@@ -1866,7 +1866,7 @@ try { (function(){
       var cur = it.cur || "EUR", h = it.history || [], last = h[h.length - 1], prev = h[h.length - 2];
       var link = it.link ? ' <a href="' + String(it.link).replace(/"/g, "&quot;") + '" target="_blank" rel="noopener">בדוק ↗</a>' : '';
       var q = it.quotes ? Object.keys(it.quotes).filter(function(k){ return it.quotes[k] != null; }).map(function(k){ return k + ' ' + money(it.quotes[k], cur); }).join(' · ') : '';
-      var nm = '<div class="nm">' + it.name + '<small>שילמנו ' + money(it.paid, cur) + (last ? ' · נבדק ב־' + dm(last.d) + (last.src ? ' ב־' + last.src : '') : '') +
+      var nm = '<div class="nm">' + it.name + '<small>' + (it.paid_note ? it.paid_note + '<br>' : '') + (it.paid_note ? 'מחיר החדר ששילמנו ' : 'שילמנו ') + money(it.paid, cur) + (last ? ' · נבדק ב־' + dm(last.d) + (last.src ? ' ב־' + last.src : '') : '') +
         (it.fare ? ' · ' + it.fare : '') + (q ? '<br>מחירים היום: ' + q : '') + (it.error ? '<br>⚠️ ' + it.error : '') + link + '</small></div>';
       if (!last){
         var o = it.other_room;
