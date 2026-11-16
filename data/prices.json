@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-14T09:55:55+00:00",
+  "checked": "2026-11-16T17:40:00+00:00",
   "items": {
     "flights": {
       "name": "✈️ טיסות ישראייר 6H347 / 6H350",
@@ -12,36 +12,42 @@
           "p": 396,
           "src": "google-flights",
           "ils": null
+        },
+        {
+          "d": "2026-11-16",
+          "p": 842,
+          "src": "google-flights",
+          "ils": null
         }
       ],
       "quotes": {
         "israir": null,
-        "google-flights": 396
+        "google-flights": 842
       },
       "link": "https://www.google.com/travel/flights?q=Flights%20from%20TLV%20to%20FCO%20on%202026-12-20%20returning%202026-12-23%20for%202%20adults%20nonstop&curr=USD&hl=en&gl=IL",
-      "note": "אתר ישראייר חסום לבדיקה אוטומטית (Queue-it/Incapsula), המחיר מ־Google Flights. 6H347 מופיעה עם נחיתה ב־18:55 (במקום 18:50) והיא הטיסה היחידה של ישראייר ביום הזה. בכיוון אחד: ‎$198 הלוך + ‎$199 חזור."
+      "note": "אתר ישראייר לא נטען לבדיקה אוטומטית, המחיר מ־Google Flights (לשני מבוגרים, כולל מסים). 6H347 מופיעה עם נחיתה ב־18:55 (במקום 18:50). בכיוון אחד: ‎$354 הלוך + ‎$489 חזור. המחיר עלה מאוד מאז 14.11 ($396)."
     },
     "hotel": {
       "name": "🏨 <bdi>White Hotel</bdi>, רומא (3 לילות)",
       "cur": "EUR",
       "paid": 727,
-      "fare": "חדר זוגי · ארוחת בוקר · ביטול חינם · באתר המלון · כולל מס עירוני",
-      "history": [],
+      "fare": "חדר זוגי סופיריור · ארוחת בוקר · ביטול חינם · באתר המלון · כולל מס עירוני",
+      "history": [
+        {
+          "d": "2026-11-16",
+          "p": 677,
+          "src": "hotel",
+          "ils": null
+        }
+      ],
       "quotes": {
-        "hotel": null,
+        "hotel": 677,
         "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
       "link": "https://book.blastness.com/results?lingua_int=eng&id_albergo=20709&dc=1596&id_stile=&notti_1=3&tot_camere=1&tot_adulti=2&tot_bambini=0&gg=20&mm=12&aa=2026",
-      "note": "החדרים הזוגיים (סטנדרט/סופיריור) אזלו באתר המלון לתאריכים שלנו; הזול שנשאר עם ארוחת בוקר וביטול חינם הוא Triple Room Superior לשני מבוגרים: €707 + מס עירוני €45 = €752 (ג׳וניור סוויט: €803). Booking.com חסם את הבדיקה, Hotels.com לא נטען, Agoda לא החזיר תוצאות.",
-      "other_room": {
-        "d": "2026-11-14",
-        "p": 752,
-        "src": "hotel",
-        "room": "Triple Room Superior לשניים (החדרים הזוגיים אזלו)"
-      },
-      "error": "החדרים הזוגיים אזלו באתר המלון לתאריכים שלנו, אז אין היום מחיר להשוואה. ההזמנה שלנו שמורה"
+      "note": "באתר המלון חזר היום Superior Room (חדר זוגי סופיריור, 15 מ״ר), תעריף גמיש עם ארוחת בוקר: €632 + מס עירוני €45 = €677. ביטול חינם עד 15.12.2026 בסוף היום, בלי תשלום עכשיו. Booking.com חסם את הבדיקה, Hotels.com לא נטען, Agoda לא החזיר תוצאות."
     }
   }
 }
