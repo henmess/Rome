@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-16T17:40:00+00:00",
+  "checked": "2026-11-17T06:54:27+00:00",
   "items": {
     "flights": {
       "name": "✈️ טיסות ישראייר 6H347 / 6H350",
@@ -18,14 +18,20 @@
           "p": 842,
           "src": "google-flights",
           "ils": null
+        },
+        {
+          "d": "2026-11-17",
+          "p": 872,
+          "src": "google-flights",
+          "ils": null
         }
       ],
       "quotes": {
         "israir": null,
-        "google-flights": 842
+        "google-flights": 872
       },
-      "link": "https://www.google.com/travel/flights?q=Flights%20from%20TLV%20to%20FCO%20on%202026-12-20%20returning%202026-12-23%20for%202%20adults%20nonstop&curr=USD&hl=en&gl=IL",
-      "note": "אתר ישראייר לא נטען לבדיקה אוטומטית, המחיר מ־Google Flights (לשני מבוגרים, כולל מסים). 6H347 מופיעה עם נחיתה ב־18:55 (במקום 18:50). בכיוון אחד: ‎$354 הלוך + ‎$489 חזור. המחיר עלה מאוד מאז 14.11 ($396)."
+      "link": "https://www.google.com/travel/flights/booking?tfs=CBwQAhpBEgoyMDI2LTEyLTIwIh8KA1RMVhIKMjAyNi0xMi0yMBoDRkNPKgI2SDIDMzQ3KABqBwgBEgNUTFZyBwgBEgNGQ08aQRIKMjAyNi0xMi0yMyIfCgNGQ08SCjIwMjYtMTItMjMaA1RMVioCNkgyAzM1MCgAagcIARIDRkNPcgcIARIDVExWQAFAAUgBcAGCAQsI____________AZgBAQ&hl=en&gl=IL&curr=USD",
+      "note": "אתר ישראייר נטען, אבל שדות החיפוש לא נפתחו בבדיקה האוטומטית, לכן המחיר מ־Google Flights (הזמנה ישירה מול ישראייר, לשני מבוגרים, כולל מסים, תיק יד אחד לנוסע). 6H347 מופיעה עם נחיתה ב־18:55 (במקום 18:50), 6H350 יוצאת ב־20:10. המחיר עלה מ־$842 אתמול ל־$872 היום."
     },
     "hotel": {
       "name": "🏨 <bdi>White Hotel</bdi>, רומא (3 לילות)",
@@ -38,6 +44,12 @@
           "p": 677,
           "src": "hotel",
           "ils": null
+        },
+        {
+          "d": "2026-11-17",
+          "p": 677,
+          "src": "hotel",
+          "ils": null
         }
       ],
       "quotes": {
@@ -47,7 +59,7 @@
         "agoda": null
       },
       "link": "https://book.blastness.com/results?lingua_int=eng&id_albergo=20709&dc=1596&id_stile=&notti_1=3&tot_camere=1&tot_adulti=2&tot_bambini=0&gg=20&mm=12&aa=2026",
-      "note": "באתר המלון חזר היום Superior Room (חדר זוגי סופיריור, 15 מ״ר), תעריף גמיש עם ארוחת בוקר: €632 + מס עירוני €45 = €677. ביטול חינם עד 15.12.2026 בסוף היום, בלי תשלום עכשיו. Booking.com חסם את הבדיקה, Hotels.com לא נטען, Agoda לא החזיר תוצאות.",
+      "note": "באתר המלון היום Superior Room (חדר זוגי סופיריור, 15 מ״ר), תעריף גמיש עם ארוחת בוקר: €632 + מס עירוני €45 = €677, בדיוק מה ששילמנו. ביטול חינם עד 15.12.2026 בסוף היום, בלי תשלום עכשיו. (תעריף לא ניתן לביטול עם ארוחת בוקר: €620, לא מתאים לתנאים שלנו.) Booking.com חסם את הבדיקה, Hotels.com לא נטען, Agoda לא החזיר תוצאות.",
       "paid_note": "שילמנו €727 בסך הכול: €677 על החדר (כולל ארוחת בוקר ומס עירוני) ועוד €50 על צ׳ק־אאוט מאוחר. משווים רק את מחיר החדר"
     }
   }
