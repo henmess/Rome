@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-21T06:49:29+00:00",
+  "checked": "2026-11-22T06:46:04+00:00",
   "items": {
     "flights": {
       "name": "✈️ טיסות ישראייר 6H347 / 6H350",
@@ -36,15 +36,20 @@
           "p": 396,
           "src": "google-flights",
           "ils": null
+        },
+        {
+          "d": "2026-11-22",
+          "p": 396,
+          "src": "google-flights",
+          "ils": null
         }
       ],
       "quotes": {
         "israir": null,
-        "google-flights": null
+        "google-flights": 396
       },
       "link": "https://www.google.com/travel/flights/booking?tfs=CBwQAhpBEgoyMDI2LTEyLTIwIh8KA1RMVhIKMjAyNi0xMi0yMBoDRkNPKgI2SDIDMzQ3KABqBwgBEgNUTFZyBwgBEgNGQ08aQRIKMjAyNi0xMi0yMyIfCgNGQ08SCjIwMjYtMTItMjMaA1RMVioCNkgyAzM1MCgAagcIARIDRkNPcgcIARIDVExWQAFAAUgBcAGCAQsI____________AZgBAQ&hl=en&gl=IL&curr=USD",
-      "note": "היום (21.11) לא התקבל מחיר לטיסות המדויקות 6H347 ב־20.12 ו־6H350 ב־23.12: Google Flights הציג דף \"unusual traffic\" (בדיקת רובוט), ולא עקפנו אותו; באתר ישראייר טופס החיפוש שוב לא הגיב בבדיקה האוטומטית. המחיר האחרון שנבדק: $396 ב־Google Flights ב־20.11 (התעריף הזול ביותר, סוג התעריף שלנו לא ידוע).",
-      "error": "לא נמצא מחיר היום: Google Flights הציג בדיקת רובוט (captcha) וטופס החיפוש באתר ישראייר לא הגיב"
+      "note": "היום (22.11) ב־Google Flights: הטיסות המדויקות של ישראייר 6H347 ב־20.12 (16:10–18:55) ו־6H350 ב־23.12 (20:10–00:30), הלוך וחזור לשני מבוגרים: $396 בסך הכול כולל מסים, בהזמנה ישירה מול ישראייר (התעריף הזול ביותר: תיק יד חינם, מזוודה בתשלום; סוג התעריף שלנו לא ידוע). באתר ישראייר טופס החיפוש שוב לא הגיב בבדיקה האוטומטית."
     },
     "hotel": {
       "name": "🏨 <bdi>White Hotel</bdi>, רומא (3 לילות)",
@@ -90,11 +95,11 @@
         "agoda": null
       },
       "link": "https://book.blastness.com/results?lingua_int=eng&id_albergo=20709&dc=1596&id_stile=&notti_1=3&tot_camere=1&tot_adulti=2&tot_bambini=0&gg=20&mm=12&aa=2026",
-      "note": "באתר המלון היום (נבדק פעמיים) נמצא רק פתרון אחד ל־20–23.12 לשני מבוגרים: Triple Room Superior (17 מ״ר), שאינו חדר זוגי ולכן לא נרשם בהיסטוריה. תעריף גמיש עם ארוחת בוקר וביטול חינם עד 16.12.2026: €720 (\"כולל מסים ועמלות\"); בלי ביטול: €659. אתמול Superior Room זוגי עם ארוחת בוקר וביטול חינם היה €612. Booking.com: אין זמינות במלון לתאריכים האלה. Agoda: 0 תוצאות. Hotels.com לא נבדק (לא נטען בבדיקות קודמות). ההזמנה שלנו (€677) לא מושפעת: כדאי לא לבטל אותה.",
+      "note": "באתר המלון היום (22.11) נמצא שוב רק פתרון אחד ל־20–23.12 לשני מבוגרים: Triple Room Superior (17 מ״ר), שאינו חדר זוגי ולכן לא נרשם בהיסטוריה. תעריף גמיש עם ארוחת בוקר וביטול חינם עד 16.12.2026: €720 (\"כולל מסים ועמלות\"); בלי ביטול עם ארוחת בוקר: €659; בלי ארוחת בוקר: €660 גמיש / €599 בלי ביטול. Booking.com: אין זמינות במלון לתאריכים האלה. Agoda: שגיאת חיפוש (\"There was a problem completing your search\"). Hotels.com לא נבדק (לא נטען בבדיקות קודמות). ההזמנה שלנו (€677) לא מושפעת: כדאי לא לבטל אותה.",
       "paid_note": "שילמנו €727 בסך הכול: €677 על החדר (כולל ארוחת בוקר ומס עירוני) ועוד €50 על צ׳ק־אאוט מאוחר. משווים רק את מחיר החדר",
       "error": "החדרים הזוגיים אזלו באתר המלון: היום מוצע רק חדר טריפל",
       "other_room": {
-        "d": "2026-11-21",
+        "d": "2026-11-22",
         "p": 720,
         "src": "hotel",
         "room": "Triple Room Superior · ארוחת בוקר · ביטול חינם עד 16.12.2026"
