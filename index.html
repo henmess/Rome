@@ -394,16 +394,21 @@ dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shad
 
 /* price tracker */
 .pt-list{display:grid;gap:8px}
-.pt-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.pt-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .pt-row .nm{font-weight:600;font-size:.92rem;min-width:0;overflow-wrap:anywhere}
 .pt-row .nm small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
 .pt-row .now{font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:left}
 .pt-row .now small{display:block;font-weight:500;font-size:.74rem;text-align:left}
 .pt-row .up{color:#c0392b}.pt-row .down{color:#1e8449}.pt-row .same{color:var(--muted)}
-.pt-row svg{display:block;width:84px;height:28px}
+.pt-hist{grid-column:1/-1;direction:ltr;border-top:1px dashed var(--line);padding-top:6px}
+.pt-chart{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;color:var(--muted);overflow:visible}
+.pt-chart text{font-family:inherit;font-variant-numeric:tabular-nums}
+.pt-chart .pv{font-size:9.5px;font-weight:700}
+.pt-chart .pdt{font-size:8.5px;fill:currentColor}
+.pt-chart .pd{font-size:8.5px;fill:currentColor;font-weight:600}
 .pt-row a{font-size:.78rem;color:var(--brand);text-decoration:none;white-space:nowrap}
 .pt-alert{margin-bottom:10px;background:color-mix(in srgb,#1e8449 14%,var(--surface));border:1px solid color-mix(in srgb,#1e8449 40%,transparent);border-radius:12px;padding:10px 12px;font-size:.9rem}
-@media (max-width:480px){.pt-row{grid-template-columns:minmax(0,1fr) auto}.pt-row .nm{grid-column:1/-1}.pt-row svg{width:100%;max-width:140px}}
+@media (max-width:480px){.pt-row{grid-template-columns:minmax(0,1fr) auto}.pt-row .nm{grid-column:1/-1}}
 @media print{#prices{display:none}}
 /* costs */
 .cost-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
@@ -1851,14 +1856,27 @@ try { (function(){
     if (Math.abs(x) < 1) return '<span class="same">ללא שינוי</span>';
     return '<span class="' + (x > 0 ? 'up' : 'down') + '">' + (x > 0 ? '▲ ' : '▼ ') + money(Math.abs(x), cur) + ' (' + pc + '%)</span>';
   }
-  function spark(h, paid){
+  // full price history chart: every past check is a dot labelled with its price and date; dashed line = what we paid
+  function chart(h, paid, cur){
     if (h.length < 2) return '';
+    var W = 340, H = 118, L = 22, R = 22, T = 18, B = 26;
+    var t = function(d){ return Date.parse(d + "T00:00:00Z") / 864e5; };
+    var t0 = t(h[0].d), t1 = t(h[h.length - 1].d), span = t1 - t0 || 1;
     var vals = h.map(function(e){ return e.p; }).concat([paid]), mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), rg = mx - mn || 1;
-    var X = function(i){ return 2 + i * 80 / (h.length - 1); }, Y = function(v){ return 25 - (v - mn) / rg * 22; };
-    var pts = h.map(function(e, i){ return X(i).toFixed(1) + "," + Y(e.p).toFixed(1); }).join(" ");
-    var last = h[h.length - 1].p, col = last > paid ? "#c0392b" : last < paid ? "#1e8449" : "#888";
-    return '<svg viewBox="0 0 84 28" aria-hidden="true"><line x1="0" x2="84" y1="' + Y(paid).toFixed(1) + '" y2="' + Y(paid).toFixed(1) + '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/>' +
-      '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+    var X = function(d){ return L + (t(d) - t0) / span * (W - L - R); }, Y = function(v){ return T + (1 - (v - mn) / rg) * (H - T - B); };
+    var yp = Y(paid).toFixed(1);
+    var out = '<svg class="pt-chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="היסטוריית מחירים">' +
+      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yp + '" y2="' + yp + '" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="4 3"/>' +
+      '<text x="2" y="' + (Y(paid) + 10).toFixed(1) + '" text-anchor="start" class="pd">' + money(paid, cur) + ' שילמנו</text>' +
+      '<polyline points="' + h.map(function(e){ return X(e.d).toFixed(1) + "," + Y(e.p).toFixed(1); }).join(" ") + '" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5" stroke-linejoin="round"/>';
+    h.forEach(function(e, i){
+      var x = X(e.d), y = Y(e.p), c = e.p > paid + 0.5 ? "#c0392b" : e.p < paid - 0.5 ? "#1e8449" : "#888";
+      var above = y > T + 10 || i % 2;  // value label above the dot unless it would leave the top
+      out += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (i === h.length - 1 ? 3.6 : 2.6) + '" fill="' + c + '"><title>' + dm(e.d) + ': ' + money(e.p, cur) + (e.src ? ' (' + e.src + ')' : '') + '</title></circle>' +
+        '<text x="' + x.toFixed(1) + '" y="' + (above ? y - 6 : y + 12).toFixed(1) + '" text-anchor="middle" class="pv" fill="' + c + '">' + money(e.p, cur) + '</text>' +
+        '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" class="pdt">' + dm(e.d) + '</text>';
+    });
+    return out + '</svg>';
   }
   function render(data){
     var items = (data && data.items) || {}, rows = "", drops = [], alerts = [];
@@ -1874,8 +1892,8 @@ try { (function(){
         rows += '<div class="pt-row">' + nm + '<div class="now same">—<small>' + (o ? 'חדר אחר (' + dm(o.d) + '): ' + money(o.p, cur) + '<br>' + o.room : 'עוד אין בדיקה') + '</small></div></div>';
         return;
       }
-      rows += '<div class="pt-row">' + nm + spark(h, it.paid) +
-        '<div class="now">' + money(last.p, cur) + '<small>' + (prev ? 'מהבדיקה הקודמת: ' + diff(last.p, prev.p, cur) + '<br>' : '') + 'מול מה ששילמנו: ' + diff(last.p, it.paid, cur) + '</small></div></div>';
+      rows += '<div class="pt-row">' + nm +
+        '<div class="now">' + money(last.p, cur) + '<small>' + (prev ? 'מהבדיקה הקודמת: ' + diff(last.p, prev.p, cur) + '<br>' : '') + 'מול מה ששילמנו: ' + diff(last.p, it.paid, cur) + '</small></div>' + (h.length > 1 ? '<div class="pt-hist">' + chart(h, it.paid, cur) + '</div>' : '') + '</div>';
       if (last.p < it.paid - 0.5){
         drops.push('📉 ' + it.name.replace(/\s*\(.*\)$/, '') + ': <b>' + money(last.p, cur) + '</b> · זול ב־' + money(it.paid - last.p, cur));
         if (id === "hotel" && (it.paid - last.p >= 25 || (it.paid - last.p) / it.paid >= 0.03)) alerts.push('💰 המלון זול היום ב־' + money(it.paid - last.p, cur) + ' ממה ששילמנו. ההזמנה עם ביטול חינם, אז כדאי לבדוק הזמנה מחדש.');
@@ -1884,7 +1902,7 @@ try { (function(){
     list.innerHTML = rows;
     alertBox.innerHTML = alerts.length ? '<div class="pt-alert">' + alerts.join('<br>') + '</div>' : '';
     sub.textContent = data && data.checked
-      ? "סוכן בודק כל יום את מחיר הטיסות (ישראייר ו־Google Flights) ואת מחיר המלון (באתר המלון, ולהשוואה גם ב־Booking.com, ב־Hotels.com ובאגודה), לאותן טיסות ולאותו חדר עם ארוחת בוקר וביטול חינם. ההשוואה במטבע ששילמנו בו. בדיקה אחרונה: " + new Date(data.checked).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) + ". ▼ ירוק = זול יותר, ▲ אדום = יקר יותר."
+      ? "סוכן בודק כל יום את מחיר הטיסות (ישראייר ו־Google Flights) ואת מחיר המלון (באתר המלון, ולהשוואה גם ב־Booking.com, ב־Hotels.com ובאגודה), לאותן טיסות ולאותו חדר עם ארוחת בוקר וביטול חינם. ההשוואה במטבע ששילמנו בו. בדיקה אחרונה: " + new Date(data.checked).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) + ". ▼ ירוק = זול יותר, ▲ אדום = יקר יותר. בגרף: כל הבדיקות הקודמות עם המחיר והתאריך, והקו המקווקו הוא מה ששילמנו."
       : "הבדיקה היומית עוד לא רצה.";
     window.PRICE_DROPS = drops;
     if (drops.length && window.TRIP_TICKER) window.TRIP_TICKER();
