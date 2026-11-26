@@ -28,10 +28,13 @@ Check whether the price includes the city tax (our €653 does). If a site exclu
 2. If a site shows a captcha / bot wall or does not load, skip it and note it; do not work around it. If no source gives a matching price, or the dates are not bookable, record an error. Never guess.
 3. Prices shown in ILS: convert to the paid currency with the day's rate (ECB / WebSearch), rounded to 1 unit, and keep the ILS amount in `ils`.
 
+## How often
+The scheduled task runs **every hour**. Check the **hotel on every run**. Check the **flights only once a day**: only if `items.flights.history` has no entry for today's date yet and today's flight check has not already failed (no `error` written today); otherwise leave the flights item untouched. Flights are already booked, so they are information only, and checking Google Flights every hour would trigger its captcha.
+
 ## Write the result
 Update `data/prices.json` (keep its format; the page reads it):
-- For each item with a matching price: append `{ "d": "YYYY-MM-DD", "p": <total in the paid currency>, "src": "<site>", "ils": <ILS amount or null> }` to `items.<id>.history`.
-  If today's date is already there, replace it. Remove that item's `error`.
+- For each item with a matching price: append `{ "d": "YYYY-MM-DD", "t": "HH:MM", "p": <total in the paid currency>, "src": "<site>", "ils": <ILS amount or null> }` to `items.<id>.history` (`d`/`t` = the check time in Israel time, Asia/Jerusalem).
+  Always append a new entry, even if today already has entries (the check runs every hour and prices move during the day). Remove that item's `error`.
 - Set `items.<id>.quotes` to today's matching prices per source in the paid currency, e.g. `{ "hotel": 727, "booking.com": 760, "hotels.com": null, "agoda": 748 }` or `{ "israir": 384, "google-flights": 390 }` (null = not available / blocked).
 - Set `items.<id>.link` to the official page that shows this search, when the site has such a link.
 - Set `items.<id>.fare` to a short Hebrew description of what was compared (e.g. "חדר זוגי · ארוחת בוקר · ביטול חינם · באתר המלון").
