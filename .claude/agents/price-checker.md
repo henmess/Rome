@@ -11,7 +11,7 @@ Compare **in the currency we paid** (flights in USD, hotel in EUR) so exchange-r
 | id | What | Dates | Party / room | Conditions | Paid |
 |---|---|---|---|---|---|
 | flights | Israir 6H347 TLV→FCO (lands 18:50) and 6H350 FCO→TLV (departs 20:10) | 20.12.2026 out, 23.12.2026 back | 2 adults, round trip, economy | the same flights, the same fare type we booked (cheapest fare that includes what we have; if unknown, the cheapest fare and say so) | $384 total for both |
-| hotel | White Hotel, Via in Arcione 77, Rome | 20–23.12.2026, 3 nights | 1 double room, 2 adults | breakfast included + free cancellation, booked on the hotel's own website; the price includes the city tax | **€603 for the room** (we paid €653 in total: €603 room + €50 late check-out add-on, which is not part of the comparison; re-booked on 25.11, was €677) |
+| hotel | White Hotel, Via in Arcione 77, Rome | 20–23.12.2026, 3 nights | 1 double room, 2 adults | breakfast included + free cancellation, booked on the hotel's own website; the price includes the city tax | **€585 for the room** (we paid €635 in total: €585 room + €50 late check-out add-on, which is not part of the comparison; re-booked on 27.11, before that €603 and €677) |
 
 ## Sources, in this order
 - **Hotel:** 1) the hotel's own website / booking engine (this is where we booked); 2) for reference also Booking.com, Hotels.com and Agoda, same room type, breakfast + free cancellation.
@@ -20,7 +20,7 @@ Compare **in the currency we paid** (flights in USD, hotel in EUR) so exchange-r
 
 If the exact flights, room or conditions are not offered, do NOT add a price to `history` (the page would show a false drop or rise). Put the closest alternative in `items.<id>.other_room` ({d, p, src, room}) and set `error` explaining that no matching room/flight was found today (e.g. "החדרים הזוגיים אזלו באתר המלון"). A triple or a suite is NOT a double room.
 Small differences (room name, bed type) are fine if the room is a double with breakfast and free cancellation; explain in `note`.
-Check whether the price includes the city tax (our €653 does). If a site excludes it, add it (Rome 4-star: about €7.50 per person per night = €45 for us) and say so in `note`. Do not add the late check-out (€50) to today's price.
+Check whether the price includes the city tax (our €635 does). If a site excludes it, add it (Rome 4-star: about €7.50 per person per night = €45 for us) and say so in `note`. Do not add the late check-out (€50) to today's price.
 
 ## How to check
 1. Open each site with Playwright (Chromium is pre-installed; launch with `--proxy-server=$HTTPS_PROXY`, desktop viewport).
@@ -45,6 +45,6 @@ Then commit only `data/prices.json` and push it to the branch the site is publis
 
 ## Report (Hebrew, short)
 One line per item: today's cheapest matching price, the price paid, the difference (amount and %), the source, and the other sources' prices.
-Start with an alert if the hotel room is at least 3% or €25 cheaper than €603 (the room price we paid, without the €50 late check-out): "💰 כדאי לבדוק הזמנה מחדש: …" — the hotel booking has free cancellation, so a cheaper price is worth re-booking.
+Start with an alert if the hotel room is at least 3% or €25 cheaper than €585 (the room price we paid, without the €50 late check-out): "💰 כדאי לבדוק הזמנה מחדש: …" — the hotel booking has free cancellation, so a cheaper price is worth re-booking.
 For flights, a drop is information only (the ticket may not be refundable); say so.
 Never book, hold, log in or enter personal or payment details. Only search and read prices.
