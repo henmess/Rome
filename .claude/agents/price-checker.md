@@ -45,6 +45,6 @@ Then commit only `data/prices.json` and push it to the branch the site is publis
 
 ## Report (Hebrew, short)
 One line per item: today's cheapest matching price, the price paid, the difference (amount and %), the source, and the other sources' prices.
-Start with an alert if the hotel room is at least 3% or €25 cheaper than €585 (the room price we paid, without the €50 late check-out): "💰 כדאי לבדוק הזמנה מחדש: …" — the hotel booking has free cancellation, so a cheaper price is worth re-booking.
+Start with an alert if the hotel room is more than €5 cheaper than €585 (the room price we paid, without the €50 late check-out): "💰 כדאי לבדוק הזמנה מחדש: …" — the hotel booking has free cancellation, so a cheaper price is worth re-booking.
 For flights, a drop is information only (the ticket may not be refundable); say so.
 Never book, hold, log in or enter personal or payment details. Only search and read prices.

@@ -1907,7 +1907,7 @@ try { (function(){
         '<div class="now">' + money(last.p, cur) + '<small>' + (prev ? 'מהבדיקה הקודמת: ' + diff(last.p, prev.p, cur) + '<br>' : '') + 'מול מה ששילמנו: ' + diff(last.p, it.paid, cur) + '</small></div>' + (h.length > 1 ? '<div class="pt-hist">' + chart(h, it.paid, cur) + '</div>' : '') + '</div>';
       if (last.p < it.paid - 0.5){
         drops.push('📉 ' + it.name.replace(/\s*\(.*\)$/, '') + ': <b>' + money(last.p, cur) + '</b> · זול ב־' + money(it.paid - last.p, cur));
-        if (id === "hotel" && (it.paid - last.p >= 25 || (it.paid - last.p) / it.paid >= 0.03)) alerts.push('💰 המלון זול היום ב־' + money(it.paid - last.p, cur) + ' ממה ששילמנו. ההזמנה עם ביטול חינם, אז כדאי לבדוק הזמנה מחדש.');
+        if (id === "hotel" && it.paid - last.p > 5) alerts.push('💰 המלון זול היום ב־' + money(it.paid - last.p, cur) + ' ממה ששילמנו. ההזמנה עם ביטול חינם, אז כדאי לבדוק הזמנה מחדש.');
       }
     });
     list.innerHTML = rows;
