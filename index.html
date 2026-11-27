@@ -175,7 +175,7 @@ nav.days a.active{background:var(--brand);border-color:var(--brand);color:#fff;t
 nav.days a.active small{opacity:.9}
 
 main{max-width:1100px;margin:0 auto;padding:0 16px 60px}
-section{margin-top:64px;scroll-margin-top:70px}
+section{margin-top:64px;scroll-margin-top:104px}
 h2.sec{font-size:clamp(1.6rem,3.5vw,2.2rem);margin:0 0 6px}
 p.sec-sub{color:var(--muted);margin:0 0 24px}
 
@@ -197,7 +197,7 @@ p.sec-sub{color:var(--muted);margin:0 0 24px}
 .hotel-card .tag{display:inline-block;font-size:.76rem;font-weight:700;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);padding:2px 10px;border-radius:99px}
 
 /* ---------- day cards ---------- */
-.day{background:var(--surface);border-radius:26px;box-shadow:var(--shadow);overflow:hidden;margin-top:34px;scroll-margin-top:70px;border-top:6px solid var(--c)}
+.day{background:var(--surface);border-radius:26px;box-shadow:var(--shadow);overflow:hidden;margin-top:34px;scroll-margin-top:104px;border-top:6px solid var(--c)}
 .day#day1{--c:var(--d1)} .day#day2{--c:var(--d2)} .day#day3{--c:var(--d3)} .day#day4{--c:var(--d4)}
 .day-head{position:relative;height:clamp(240px,40vw,380px)}
 .day-head .ph{position:absolute;inset:0}
@@ -583,8 +583,8 @@ footer a{color:var(--muted)}
     <a href="#ideas">🎄 עוד רעיונות</a>
     <a href="#book">🎟️ להזמין</a>
     <a href="#cams">📷 מצלמות</a>
-    <a href="#prices">📉 מחירים</a>
     <a href="#costs">💰 עלויות</a>
+    <a href="#prices">📉 מחירים</a>
     <a href="#sos">🚨 חירום</a>
     <a href="#tips">טיפים</a>
   </div>
@@ -1584,8 +1584,15 @@ try { (function(){
     if (a) wrap.scrollTo({ left: a.offsetLeft - (wrap.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
   }
   function onScroll(){
-    var line = nav.getBoundingClientRect().bottom + window.innerHeight * 0.25, idx = -1;
-    targets.forEach(function(t,i){ if (t && t.getBoundingClientRect().top <= line) idx = i; });
+    // the active link is the section whose top is the lowest one that has passed the line (by position on the page,
+    // not by the order of the links); at the very bottom of the page, the last section that is in view wins
+    var line = nav.getBoundingClientRect().bottom + window.innerHeight * 0.25, idx = -1, best = -Infinity;
+    var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    targets.forEach(function(t,i){
+      if (!t) return;
+      var top = t.getBoundingClientRect().top;
+      if ((top <= line || (atBottom && top < window.innerHeight)) && top > best){ best = top; idx = i; }
+    });
     if (idx === -1){ links.forEach(function(a){ a.classList.remove("active"); }); current = null; }
     else setActive(idx);
     nav.classList.toggle("stuck", nav.getBoundingClientRect().top <= 0);
