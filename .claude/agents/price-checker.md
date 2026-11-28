@@ -29,7 +29,7 @@ Check whether the price includes the city tax (our €635 does). If a site exclu
 3. Prices shown in ILS: convert to the paid currency with the day's rate (ECB / WebSearch), rounded to 1 unit, and keep the ILS amount in `ils`.
 
 ## How often
-The scheduled task runs **every hour**. Check the **hotel on every run**. Check the **flights only once a day**: only if `items.flights.history` has no entry for today's date yet and today's flight check has not already failed (no `error` written today); otherwise leave the flights item untouched. Flights are already booked, so they are information only, and checking Google Flights every hour would trigger its captcha.
+The scheduled task runs **every hour**. Check the **hotel on every run**. Check the **flights only once a day**, on the first run at or after **10:00 Israel time** (daytime checks are less likely to hit the captcha than night ones), and only if `items.flights.history` has no entry for today's date yet. If that check fails (captcha / site not loading), you may try **once more** on the first run at or after 16:00 the same day; after that, leave it for tomorrow. On every other run leave the flights item untouched. Flights are already booked, so they are information only, and checking Google Flights every hour would trigger its captcha.
 
 ## Write the result
 Update `data/prices.json` (keep its format; the page reads it):
